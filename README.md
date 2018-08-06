@@ -1,4 +1,4 @@
 # Flakelord_frontend
-npm i
-npm start dev - develope mode
-npm start prd - production mode
+npm i <br>
+npm start dev - develope mode <br>
+npm start prod - production mode <br>
