@@ -5,13 +5,14 @@
 }
 
 html {
-    overflow: hidden;
+    //overflow: hidden;
 }
 
 body {
     background-color: $bg-color;
     line-height: 1;
     width: 100%;
+    font-family: UbuntuMono-B;
 }
 
 button {

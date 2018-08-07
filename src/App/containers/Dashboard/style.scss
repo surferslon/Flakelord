@@ -1,7 +1,21 @@
 .dashboard {
     display: flex;
-    align-items: center;
+    flex-direction: column;
     justify-content: center;
+    align-items: center;
     flex-grow: 1;
     width: 100%;
+    font-size: 14px;
+    .row {
+        display: flex;
+    }
+    .clearGrid, .wall {
+        width: 10px;
+        height: 10px;
+        background-color: black;
+        margin: 1px;
+    }
+    .wall {
+        background-color: grey;
+    }
 }
