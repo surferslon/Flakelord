@@ -29,13 +29,14 @@ class Dashboard extends React.Component {
     for (let i = 0; i < rowSize; i += 1) {
       const colArr = [];
       for (let j = 0; j < colSize; j += 1) {
-        const comparison = data.walls.find(item => item.x === i && item.y === j);
+        const comparison = data.cells.find(item => item.x === i && item.y === j);
         if (comparison) {
-          colArr.push({ x: i, y: j, type: 'wall' });
+          colArr.push(comparison);
         } else {
           colArr.push({ x: i, y: j });
         }
       }
+      console.log(colArr);
       result.push(colArr);
     }
     return result;
@@ -50,20 +51,28 @@ class Dashboard extends React.Component {
             <div className={style.row} key={index}>
               {
                 row.map((col, index) => (
-                  <div key={index}>
+                  <React.Fragment key={index}>
                     {
-                      col.type && col.type === 'wall' ?
-                        <div className={style.filledGrid}>
+                      col.type ?
+                        <React.Fragment>
                           {
-                            col.type === 'wall' ?
+                            !col.content && col.type === 'wall' ?
                               <div className={style.wall} />
                             :
-                              <div className={style.unoccupiedGrid} />
+                              <div className={style.unoccupiedGrid}>
+                                {
+                                  col.content.person.type === 'monstr' ?
+                                    <div className={style.monstr} />
+                                  :
+                                    <div className={style.person} />
+                                 
+                                }
+                              </div>
                           }
-                        </div>
+                        </React.Fragment>
                       : <div className={style.clearGrid} />
                     }
-                  </div>
+                  </React.Fragment>
                 ))
               }
             </div>

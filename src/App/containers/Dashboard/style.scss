@@ -9,13 +9,19 @@
     .row {
         display: flex;
     }
-    .clearGrid, .wall {
-        width: 10px;
-        height: 10px;
+    .clearGrid, .wall, .monstr, .person {
+        width: 1.5vh;
+        height: 1.5vh;
         background-color: black;
         margin: 1px;
     }
     .wall {
         background-color: grey;
+    }
+    .monstr {
+        background-color: red;
+    }
+    .person {
+        background-color: blue;
     }
 }

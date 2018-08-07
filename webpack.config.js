@@ -64,11 +64,6 @@ module.exports = (env, options) => ({
         ],
       },
       {
-        test: /\.svg$/,
-        loader: 'svg-inline-loader',
-      },
-
-      {
         test: /\.(woff(2)?|ttf|eot|svg)(\?v=\d+\.\d+\.\d+)?$/,
         use: [{
           loader: 'file-loader',
