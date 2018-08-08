@@ -94,31 +94,13 @@ const data = {
       id: 15,
       x: 9,
       y: 7,
-      type: 'cell',
-      content: {
-        person: {
-          id: 1,
-          name: 'slon',
-          type: 'monstr',
-        },
-        subject: {
-          name: 'arrow of dastiny',
-        },
-      },
+      type: 'monstr',
     },
     {
       id: 16,
       x: 9,
       y: 5,
-      type: 'cell',
-      content: {
-        person: {
-          id: 1,
-          name: 'slon',
-          type: 'player',
-        },
-        subject: null,
-      },
+      type: 'player',
     },
   ],
 };

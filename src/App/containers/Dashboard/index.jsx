@@ -1,4 +1,5 @@
 import React from 'react';
+import GridCell from '../GridCell';
 
 import style from './style.scss';
 import data from './data';
@@ -51,28 +52,7 @@ class Dashboard extends React.Component {
             <div className={style.row} key={index}>
               {
                 row.map((col, index) => (
-                  <React.Fragment key={index}>
-                    {
-                      col.type ?
-                        <React.Fragment>
-                          {
-                            !col.content && col.type === 'wall' ?
-                              <div className={style.wall} />
-                            :
-                              <div className={style.unoccupiedGrid}>
-                                {
-                                  col.content.person.type === 'monstr' ?
-                                    <div className={style.monstr} />
-                                  :
-                                    <div className={style.person} />
-                                 
-                                }
-                              </div>
-                          }
-                        </React.Fragment>
-                      : <div className={style.clearGrid} />
-                    }
-                  </React.Fragment>
+                  <GridCell data={col} key={index} />
                 ))
               }
             </div>
