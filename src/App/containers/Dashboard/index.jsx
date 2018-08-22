@@ -1,5 +1,9 @@
 import React from 'react';
 import GridCell from '../GridCell';
+import { bindActionCreators } from 'redux';
+import { connect } from 'react-redux';
+
+import { getMapData } from '../../../redux/actions';
 
 import style from './style.scss';
 import data from './data';
@@ -23,6 +27,10 @@ class Dashboard extends React.Component {
     this.setState({
       grid: map,
     });
+  }
+
+  componentDidMount() {
+    this.props.getMapData();
   }
 
   generateMap(colSize, rowSize) { // eslint-disable-line
@@ -63,4 +71,14 @@ class Dashboard extends React.Component {
   }
 }
 
-export default Dashboard;
+const mapStateToProps = state => ({
+  mapData: state.mapData,
+});
+
+const mapDispatchToProps = dispatch => (
+  bindActionCreators({
+    getMapData,
+  }, dispatch)
+);
+
+export default connect(mapStateToProps, mapDispatchToProps)(Dashboard);

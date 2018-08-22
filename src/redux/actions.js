@@ -1,6 +1,17 @@
-import { DEFAULT_ACTION } from './constants';
+import {
+  RECEIVE_MAP_DATA,
+} from './constants';
 
-export const getTodoList = data => ({
-  type: DEFAULT_ACTION,
+export const receiveMapData = data => ({
+  type: RECEIVE_MAP_DATA,
   data,
 });
+
+export function getMapData() {
+  return (dispatch) => {
+    fetch('https://printerror.xyz/flakelord/API/FakeMap/') // eslint-disable-line
+      .then(response => response.json())
+      .then(items => dispatch(receiveMapData(items)))
+      .catch(() => console.error('error getMapData'));
+  };
+}
