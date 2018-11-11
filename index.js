@@ -80,24 +80,30 @@ window.onload = function() {
 
     drawMap()
 
+    function collision(x, y) {
+        if (map[y/20][x/20] != '.') {
+            return true
+        }
+        return false
 
-    //move rectangle inside the canvas using arrow keys
+    }
+
     document.onkeydown = function(event) {
         var keyPr = event.keyCode; //Key code of key pressed
 
-        if(keyPr === 68 && x<=1200){ 
+        if(keyPr === 68 && x<=1200 && !collision(x+20, y)) { 
             x = x+20; //right
         }
-        else if(keyPr === 65 && x>0){
+        else if(keyPr === 65 && x>0 && !collision(x-20, y)) {
             x = x-20; //left
         }
-        else if(keyPr === 87 && y>0) {
+        else if(keyPr === 87 && y>0 && !collision(x, y-20)) {
             y = y-20; //up
         }
-        else if(keyPr === 83 && y<=600){
+        else if(keyPr === 83 && y<=600 && !collision(x, y+20)) {
             y = y+20; //down
         }
-            
+        
         ctx.clearRect(0, 0, 1200, 600); //clearing anything drawn on canvas
       
         drawPlayer(x, y, wid, hei)
