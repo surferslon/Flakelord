@@ -157,26 +157,26 @@ window.onload = function() {
 
     document.onkeydown = function(event) {
         var key = event.keyCode; //Key code of key pressed
-        // console.log(key);
+        //console.log(key);
         
-        if(key === 68 && player_x<=1200 && !collision(player_x+1, player_y-1)) { 
+        if(key === 69 && player_x<=1200 && !collision(player_x+1, player_y-1)) { 
             player_x = player_x+1;
             player_y = player_y-1;
         } // right
-        else if(key === 69 && x>0 && !collision(player_x, player_y-1)) { 
+        else if(key === 87 && x>0 && !collision(player_x, player_y-1)) { 
             player_y = player_y-1;
         } // right up
-        else if(key === 67 && x>0 && !collision(player_x+1, player_y)) { 
+        else if(key === 68 && x>0 && !collision(player_x+1, player_y)) { 
             player_x = player_x+1; 
         } // rigth down
-        else if(key === 65 && x>0 && !collision(player_x-1, player_y+1)) { 
+        else if(key === 90 && x>0 && !collision(player_x-1, player_y+1)) { 
             player_x = player_x-1; 
             player_y = player_y+1;
         } // left
-        else if(key === 81 && player_x>0 && !collision(player_x-1, player_y)) {
+        else if(key === 65 && player_x>0 && !collision(player_x-1, player_y)) {
             player_x = player_x-1;
         } // left up
-        else if(key === 87 && y>0 && !collision(player_x-1, player_y-1)) { 
+        else if(key === 81 && y>0 && !collision(player_x-1, player_y-1)) { 
             player_x = player_x-1;
             player_y = player_y-1;
         } // up
@@ -184,7 +184,7 @@ window.onload = function() {
             player_x = player_x+1;
             player_y = player_y+1; 
         } // down
-        else if(key === 90 && player_x>0 && !collision(player_x, player_y+1)) {
+        else if(key === 83 && player_x>0 && !collision(player_x, player_y+1)) {
             player_y = player_y+1; 
         } // left down
         
