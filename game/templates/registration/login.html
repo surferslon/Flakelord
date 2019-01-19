@@ -1,0 +1,36 @@
+
+{% block head %}
+<head>
+    <meta charset="UTF-8"> 
+    {% load static %}
+    <link rel="stylesheet" href="{% static "auth.css" %}">
+</head>
+
+{% endblock %}
+
+{% block content %}
+
+<body>
+
+    <div class='wrapper'>
+        <form class='auth_form' method='post' action="{% url 'login' %}">
+            {% csrf_token %}
+
+            <h3>Flakelord</h3>
+            <label>Name</label>
+            {{ form.username }}
+            <label>Password</label>
+            {{ form.password }}
+            <div>
+                <a href='#'>Registration</a>
+                <button type='submit' value="login">Login</button>
+                <input  type="hidden" name="next" value="{{ next }}" />
+            </div>
+            {% if form.errors %}
+                <p>Incorrect</p>
+            {% endif %}
+        </form>
+    </div>
+</body>
+
+{% endblock %}

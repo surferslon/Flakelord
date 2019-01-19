@@ -55,10 +55,10 @@ window.onload = function() {
     var img_wall = new Image();
     var img_floor = new Image();
 
-    img_player_l.src = 'static/img/player_l.png';
-    img_player_r.src = 'static/img/player_r.png';
-    img_wall.src   = 'static/img/wall0.png';
-    img_floor.src  = 'static/img/floor.png';
+    img_player_l.src = '/static/img/player_l.png';
+    img_player_r.src = '/static/img/player_r.png';
+    img_wall.src   = '/static/img/wall0.png';
+    img_floor.src  = '/static/img/floor.png';
 
     var monster_x = 18;
     var monster_y = 15;
@@ -66,8 +66,8 @@ window.onload = function() {
 
     var img_monster_l = new Image();
     var img_monster_r = new Image();
-    img_monster_r.src = 'static/img/ork.png'
-    img_monster_r.src = 'static/img/ork.png'
+    img_monster_r.src = '/static/img/ork.png'
+    img_monster_r.src = '/static/img/ork.png'
 
 
     stage.width  = stage.offsetWidth;
@@ -169,9 +169,9 @@ window.onload = function() {
                     drawPlayer(player_x, player_y, wid, hei);
                 }
 
-                if (cur_row==monster_y && cur_clm==monster_x) {   
-                    drawMonster(monster_x, monster_y, wid, hei);
-                }                
+                // if (cur_row==monster_y && cur_clm==monster_x) {   
+                //     drawMonster(monster_x, monster_y, wid, hei);
+                // }                
 
             }
         }

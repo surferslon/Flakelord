@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<HTML>
+
+<head>
+    <meta charset="UTF-8"> 
+    {% load static %}
+    <link rel="stylesheet" href="{% static "menu.css" %}">
+</head>
+
+<body>
+    <div class='wrapper'>
+        <div class='menu_form'>
+
+            <h2> {{ username }} </h2>
+
+            <a href='game/'>Play</a>
+
+            <a href='accounts/logout/'>Logout</a>
+            
+        </div>
+    </div>
+</body>
+
+</HTML>
