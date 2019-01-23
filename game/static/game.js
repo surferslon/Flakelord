@@ -269,8 +269,8 @@ window.onload = function() {
         x = evnt.clientX - rect.left;
         y = evnt.clientY - rect.top;
 
-        tileX = Math.round((x - draw_start_x ) / cell_width + y / cell_height);
-        tileY = Math.round(y / cell_height - (x-draw_start_x) / cell_width);
+        tileX = Math.round((x - draw_start_x ) / cell_width + (y-draw_start_y) / cell_height);
+        tileY = Math.round((y - draw_start_y) / cell_height - (x-draw_start_x) / cell_width);
 
         ctx.clearRect(0, 0, 1800, 900); //clearing anything drawn on canvas
 
