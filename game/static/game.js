@@ -48,6 +48,9 @@ window.onload = function() {
 
     var draw_start_x = 900 - (player_x) * cell_width/4;
     var draw_start_y = 450 - (player_y) * cell_height;
+
+    var new_draw_start_x = draw_start_x;
+    var new_draw_start_y = draw_start_y;
     
     var y = draw_start_y + 5*cell_height,
         x = (draw_start_x - 8*cell_width) + 5*cell_width, // Start positions 
@@ -183,6 +186,7 @@ window.onload = function() {
 
 
     function drawMap() {
+        ctx.clearRect(0, 0, 1800, 900); //clearing anything drawn on canvas
         ctx.fillStyle = "black";
         ctx.fillRect(0, 0, stage.width, stage.height);
         drawMap_background();
@@ -204,50 +208,52 @@ window.onload = function() {
             player_x = player_x+1;
             player_y = player_y-1;
             player_dir = 'r';
-            draw_start_x = draw_start_x-cell_width;
+            // draw_start_x = draw_start_x-cell_width;
+
+            new_draw_start_x = new_draw_start_x-cell_width;
+
         } // right
         else if(key === 69 && x>0 && !collision(player_x, player_y-1)) { 
             player_y = player_y-1;
             player_dir = 'r';
-            draw_start_x = draw_start_x-cell_width/2;
-            draw_start_y = draw_start_y+cell_height/2;
+            new_draw_start_x = new_draw_start_x-cell_width/2;
+            new_draw_start_y = new_draw_start_y+cell_height/2;
         } // right up
         else if(key === 67 && x>0 && !collision(player_x+1, player_y)) { 
             player_x = player_x+1; 
             player_dir = 'r';
-            draw_start_x = draw_start_x-cell_width/2;
-            draw_start_y = draw_start_y-cell_height/2;
+            new_draw_start_x = new_draw_start_x-cell_width/2;
+            new_draw_start_y = new_draw_start_y-cell_height/2;
         } // rigth down
         else if(key === 65 && x>0 && !collision(player_x-1, player_y+1)) { 
             player_x = player_x-1; 
             player_y = player_y+1;
             player_dir = 'l';
-            draw_start_x = draw_start_x+cell_width;
+            new_draw_start_x = new_draw_start_x+cell_width;
         } // left
         else if(key === 81 && player_x>0 && !collision(player_x-1, player_y)) {
             player_x = player_x-1;
             player_dir = 'l';
-            draw_start_x = draw_start_x+cell_width/2;
-            draw_start_y = draw_start_y+cell_height/2;
+            new_draw_start_x = new_draw_start_x+cell_width/2;
+            new_draw_start_y = new_draw_start_y+cell_height/2;
         } // left up
         else if(key === 87 && y>0 && !collision(player_x-1, player_y-1)) { 
             player_x = player_x-1;
             player_y = player_y-1;
-            draw_start_y = draw_start_y+cell_height;
+            new_draw_start_y = new_draw_start_y+cell_height;
         } // up
         else if(key === 88 && y<=600 && !collision(player_x+1, player_y+1)) {
             player_x = player_x+1;
             player_y = player_y+1; 
-            draw_start_y = draw_start_y-cell_height;
+            new_draw_start_y = new_draw_start_y-cell_height;
         } // down
         else if(key === 90 && player_x>0 && !collision(player_x, player_y+1)) {
             player_y = player_y+1; 
             player_dir = 'l';
-            draw_start_x = draw_start_x+cell_width/2;
-            draw_start_y = draw_start_y-cell_height/2;
+            new_draw_start_x = new_draw_start_x+cell_width/2;
+            new_draw_start_y = new_draw_start_y-cell_height/2;
         } // left down
         
-        ctx.clearRect(0, 0, 1800, 900); //clearing anything drawn on canvas
       
         if (monster_x > player_x)       {
             monster_x = monster_x - 1   }
@@ -257,8 +263,6 @@ window.onload = function() {
             monster_y = monster_y - 1;  }
         else if (monster_y < player_y)  {
             monster_y = monster_y + 1;  }
-        
-        drawMap()
 
     }
 
@@ -274,7 +278,7 @@ window.onload = function() {
 
         ctx.clearRect(0, 0, 1800, 900); //clearing anything drawn on canvas
 
-        drawMap()
+        // drawMap()
 
         coord = ConvertToCoord(tileX, tileY);
         drawRhomb(coord.x, coord.y);
@@ -289,7 +293,30 @@ window.onload = function() {
             ctx.fillText("Player", coord.x+20, coord.y);
         }
 
-      }, false);
+    }, false);
+
+    var FPS = 20;
+
+    function mainLoop() {
+        if (new_draw_start_x < draw_start_x) {
+            draw_start_x = draw_start_x - 6;
+        }
+        else if (new_draw_start_x > draw_start_x) {
+            draw_start_x = draw_start_x + 6;
+        }
+        
+        if (new_draw_start_y < draw_start_y) {
+            draw_start_y = draw_start_y - 5;   
+        }
+        if (new_draw_start_y > draw_start_y) {
+            draw_start_y = draw_start_y + 5;   
+        }
+        drawMap();
+        requestAnimationFrame(mainLoop);
+    }
+
+    requestAnimationFrame(mainLoop);
+
 }
 
 
