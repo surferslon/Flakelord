@@ -1,16 +1,13 @@
+{% extends '../base.html' %}
 
-{% block head %}
-<head>
-    <meta charset="UTF-8"> 
-    {% load static %}
+{% load staticfiles %}
+
+{% block header %}
+    {{ block.super }}    
     <link rel="stylesheet" href="{% static "auth.css" %}">
-</head>
-
 {% endblock %}
 
 {% block content %}
-
-<body>
 
     <div class='wrapper'>
         <form class='auth_form' method='post' action="{% url 'login' %}">
@@ -31,6 +28,5 @@
             {% endif %}
         </form>
     </div>
-</body>
 
 {% endblock %}

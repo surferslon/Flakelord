@@ -1,17 +1,16 @@
-<!DOCTYPE html>
-<HTML>
+{% extends 'base.html' %}
 
-<head>
-    <meta charset="UTF-8"> 
-    {% load static %}
+{% load staticfiles %}
+
+{% block header %}
+	{{ block.super }} 
     <link rel="stylesheet" href="{% static "game.css" %}">
     <script src="{% static "game.js" %}"></script> 
-</head>
+{% endblock %}
 
-<body>
+{% block content %}
     <center>
         <canvas id='cnvs'></canvas>
     </center>
-</body>
+{% endblock %}
 
-</HTML>
