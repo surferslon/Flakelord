@@ -38,9 +38,9 @@ window.onload = function() {
 ]
 
 
-    var cell_width = 88;
-    var cell_height = 46;
-    var screen_steps = 8;
+    var cell_width = 132;
+    var cell_height = 69;
+    var screen_steps = 12;
 
     var player_x = 8;
     var player_y = 5;
@@ -51,11 +51,11 @@ window.onload = function() {
 
     var new_draw_start_x = draw_start_x;
     var new_draw_start_y = draw_start_y;
-    
+
     var y = draw_start_y + 5*cell_height,
-        x = (draw_start_x - 8*cell_width) + 5*cell_width, // Start positions 
-        wid = 20, 
-        hei = 30; 
+        x = (draw_start_x - 8*cell_width) + 5*cell_width, // Start positions
+        wid = 20,
+        hei = 30;
 
     var img_player_l = new Image();
     var img_player_r = new Image();
@@ -78,7 +78,7 @@ window.onload = function() {
 
     stage.width  = stage.offsetWidth;
     stage.height = stage.offsetHeight;
-    
+
     function ConvertToCoord(x, y) {
         return {
             x: draw_start_x + ((x - y) * cell_width/2),
@@ -90,10 +90,10 @@ window.onload = function() {
         coords = ConvertToCoord(x, y)
         drawRhomb(coords.x, coords.y);
         if (player_dir=='r'){
-            ctx.drawImage(img_player_r, coords.x-cell_width/4, coords.y-cell_height+13);
+            ctx.drawImage(img_player_r, coords.x-cell_width/4, coords.y-cell_height+30);
         }
         else {
-            ctx.drawImage(img_player_l, coords.x-cell_width/4, coords.y-cell_height+13);
+            ctx.drawImage(img_player_l, coords.x-cell_width/4, coords.y-cell_height+30);
         }
     }
 
@@ -103,7 +103,7 @@ window.onload = function() {
             ctx.drawImage(img_monster_r, coords.x-cell_width/4, coords.y-cell_height+3);
         }
         else {
-            ctx.drawImage(img_monster_l, coords.x-cell_width/4, coords.y-cell_height+3);   
+            ctx.drawImage(img_monster_l, coords.x-cell_width/4, coords.y-cell_height+3);
         }
     }
 
@@ -121,7 +121,7 @@ window.onload = function() {
     }
 
     function drawWall(x, y) {
-        ctx.drawImage(img_wall, x-cell_width/2, y-cell_height-25);
+        ctx.drawImage(img_wall, x-cell_width/2, y-cell_height-35);
     }
 
     function drawFloor(x, y) {
@@ -139,7 +139,7 @@ window.onload = function() {
 
                 if (map[cur_row][cur_clm]['obj'] == 'floor') {
                     coord = ConvertToCoord(cur_clm, cur_row);
-                    drawFloor(coord.x, coord.y); 
+                    drawFloor(coord.x, coord.y);
                 }
             }
         }
@@ -168,16 +168,16 @@ window.onload = function() {
                     else if (cur_clm >= player_x && cur_row >= player_y && diff_y < 7 && diff_x<7) {
                         ctx.globalAlpha = 0.8;
                     }
-                    drawWall(coord.x, coord.y); 
+                    drawWall(coord.x, coord.y);
                     ctx.globalAlpha = 1;
                 }
-                if (cur_row==player_y && cur_clm==player_x) {   
+                if (cur_row==player_y && cur_clm==player_x) {
                     drawPlayer(player_x, player_y, wid, hei);
                 }
 
-                // if (cur_row==monster_y && cur_clm==monster_x) {   
+                // if (cur_row==monster_y && cur_clm==monster_x) {
                 //     drawMonster(monster_x, monster_y, wid, hei);
-                // }                
+                // }
 
             }
         }
@@ -203,8 +203,8 @@ window.onload = function() {
     document.onkeydown = function(event) {
         var key = event.keyCode; //Key code of key pressed
         // console.log(key);
-        
-        if(key === 68 && player_x<=1200 && !collision(player_x+1, player_y-1)) { 
+
+        if(key === 68 && player_x<=1200 && !collision(player_x+1, player_y-1)) {
             player_x = player_x+1;
             player_y = player_y-1;
             player_dir = 'r';
@@ -213,20 +213,20 @@ window.onload = function() {
             new_draw_start_x = new_draw_start_x-cell_width;
 
         } // right
-        else if(key === 69 && x>0 && !collision(player_x, player_y-1)) { 
+        else if(key === 69 && x>0 && !collision(player_x, player_y-1)) {
             player_y = player_y-1;
             player_dir = 'r';
             new_draw_start_x = new_draw_start_x-cell_width/2;
             new_draw_start_y = new_draw_start_y+cell_height/2;
         } // right up
-        else if(key === 67 && x>0 && !collision(player_x+1, player_y)) { 
-            player_x = player_x+1; 
+        else if(key === 67 && x>0 && !collision(player_x+1, player_y)) {
+            player_x = player_x+1;
             player_dir = 'r';
             new_draw_start_x = new_draw_start_x-cell_width/2;
             new_draw_start_y = new_draw_start_y-cell_height/2;
         } // rigth down
-        else if(key === 65 && x>0 && !collision(player_x-1, player_y+1)) { 
-            player_x = player_x-1; 
+        else if(key === 65 && x>0 && !collision(player_x-1, player_y+1)) {
+            player_x = player_x-1;
             player_y = player_y+1;
             player_dir = 'l';
             new_draw_start_x = new_draw_start_x+cell_width;
@@ -237,24 +237,24 @@ window.onload = function() {
             new_draw_start_x = new_draw_start_x+cell_width/2;
             new_draw_start_y = new_draw_start_y+cell_height/2;
         } // left up
-        else if(key === 87 && y>0 && !collision(player_x-1, player_y-1)) { 
+        else if(key === 87 && y>0 && !collision(player_x-1, player_y-1)) {
             player_x = player_x-1;
             player_y = player_y-1;
             new_draw_start_y = new_draw_start_y+cell_height;
         } // up
         else if(key === 88 && y<=600 && !collision(player_x+1, player_y+1)) {
             player_x = player_x+1;
-            player_y = player_y+1; 
+            player_y = player_y+1;
             new_draw_start_y = new_draw_start_y-cell_height;
         } // down
         else if(key === 90 && player_x>0 && !collision(player_x, player_y+1)) {
-            player_y = player_y+1; 
+            player_y = player_y+1;
             player_dir = 'l';
             new_draw_start_x = new_draw_start_x+cell_width/2;
             new_draw_start_y = new_draw_start_y-cell_height/2;
         } // left down
-        
-      
+
+
         if (monster_x > player_x)       {
             monster_x = monster_x - 1   }
         else if (monster_x < player_x)    {
@@ -268,7 +268,7 @@ window.onload = function() {
 
 
     stage.addEventListener('mousemove', function(evnt) {
- 
+
         var rect = stage.getBoundingClientRect();
         x = evnt.clientX - rect.left;
         y = evnt.clientY - rect.top;
@@ -306,12 +306,12 @@ window.onload = function() {
         else if (new_draw_start_x > draw_start_x) {
             draw_start_x = draw_start_x + screen_step_x;
         }
-        
+
         if (new_draw_start_y < draw_start_y) {
-            draw_start_y = draw_start_y - screen_step_y;   
+            draw_start_y = draw_start_y - screen_step_y;
         }
         if (new_draw_start_y > draw_start_y) {
-            draw_start_y = draw_start_y + screen_step_y;   
+            draw_start_y = draw_start_y + screen_step_y;
         }
         drawMap();
         requestAnimationFrame(mainLoop);
