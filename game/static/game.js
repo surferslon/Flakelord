@@ -38,9 +38,9 @@ window.onload = function() {
 ]
 
 
-    var cell_height = 40;
-    var cell_width = 60;
-
+    var cell_width = 88;
+    var cell_height = 46;
+    var screen_steps = 8;
 
     var player_x = 8;
     var player_y = 5;
@@ -90,10 +90,10 @@ window.onload = function() {
         coords = ConvertToCoord(x, y)
         drawRhomb(coords.x, coords.y);
         if (player_dir=='r'){
-            ctx.drawImage(img_player_r, coords.x-cell_width/4, coords.y-cell_height+13, 35, 50);
+            ctx.drawImage(img_player_r, coords.x-cell_width/4, coords.y-cell_height+13);
         }
         else {
-            ctx.drawImage(img_player_l, coords.x-cell_width/4, coords.y-cell_height+13, 35, 50);
+            ctx.drawImage(img_player_l, coords.x-cell_width/4, coords.y-cell_height+13);
         }
     }
 
@@ -114,18 +114,18 @@ window.onload = function() {
         ctx.lineTo(x, y + cell_height);
         ctx.lineTo(x - cell_width / 2, y + cell_height / 2);
         ctx.lineTo(x, y);
-        // ctx.strokeStyle = "rgba(0, 0, 255, 0.5)";
+        ctx.strokeStyle = "rgba(0, 0, 255, 0.5)";
         ctx.strokeStyle = 'white';
         ctx.stroke();
         ctx.closePath();
     }
 
     function drawWall(x, y) {
-        ctx.drawImage(img_wall, x-22, y-cell_height-16, cell_width+5, cell_height+57);
+        ctx.drawImage(img_wall, x-cell_width/2, y-cell_height-25);
     }
 
     function drawFloor(x, y) {
-        ctx.drawImage(img_floor, x-23, y, cell_width, cell_height);
+        ctx.drawImage(img_floor, x-cell_width/2, y);
     }
 
     function drawMap_background() {
@@ -298,18 +298,20 @@ window.onload = function() {
     var FPS = 20;
 
     function mainLoop() {
+        let screen_step_x = cell_width / screen_steps;
+        let screen_step_y = cell_height / screen_steps
         if (new_draw_start_x < draw_start_x) {
-            draw_start_x = draw_start_x - 6;
+            draw_start_x = draw_start_x - screen_step_x;
         }
         else if (new_draw_start_x > draw_start_x) {
-            draw_start_x = draw_start_x + 6;
+            draw_start_x = draw_start_x + screen_step_x;
         }
         
         if (new_draw_start_y < draw_start_y) {
-            draw_start_y = draw_start_y - 5;   
+            draw_start_y = draw_start_y - screen_step_y;   
         }
         if (new_draw_start_y > draw_start_y) {
-            draw_start_y = draw_start_y + 5;   
+            draw_start_y = draw_start_y + screen_step_y;   
         }
         drawMap();
         requestAnimationFrame(mainLoop);
