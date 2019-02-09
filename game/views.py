@@ -1,5 +1,6 @@
 from django.shortcuts import render
 from django.views.generic import TemplateView
+from .models import Room
 
 
 class GameView(TemplateView):
@@ -10,7 +11,9 @@ class GameView(TemplateView):
 class MenuView(TemplateView):
     def get(self, request, **kwargs):
         # import ipdb; ipdb.set_trace()
+        rooms = Room.objects.order_by("title")
         context = {
-            'username': request.user.username
+            'username': request.user.username,
+            "rooms": rooms,
         }
-        return render(request, 'menu.html', context=context)
+        return render(request, 'index.html', context=context)
