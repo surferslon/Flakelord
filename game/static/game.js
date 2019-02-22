@@ -175,9 +175,9 @@ window.onload = function() {
                     drawPlayer(player_x, player_y, wid, hei);
                 }
 
-                // if (cur_row==monster_y && cur_clm==monster_x) {
-                //     drawMonster(monster_x, monster_y, wid, hei);
-                // }
+                if (cur_row==monster_y && cur_clm==monster_x) {
+                    drawMonster(monster_x, monster_y, wid, hei);
+                }
 
             }
         }

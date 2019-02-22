@@ -3,6 +3,7 @@ from game import views
 from django.contrib.auth.decorators import login_required
 
 urlpatterns = [
+    path('signup/', views.user_signup, name='signup'),
     path('', login_required(views.MenuView.as_view())),
     path('game/', login_required(views.GameView.as_view())),
 ]
