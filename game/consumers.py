@@ -4,6 +4,10 @@ from channels.generic.websocket import AsyncJsonWebsocketConsumer
 
 from .exceptions import ClientError
 from .utils import get_room_or_error
+from game.models import Level
+from game.game import move
+
+
 
 
 class ChatConsumer(AsyncJsonWebsocketConsumer):
@@ -40,15 +44,12 @@ class ChatConsumer(AsyncJsonWebsocketConsumer):
         command = content.get("command", None)
         try:
             if command == "join":
-                # Make them join the room
                 await self.join_room(content["room"])
             elif command == "leave":
-                # Leave the room
                 await self.leave_room(content["room"])
             elif command == "send":
                 await self.send_room(content["room"], content["message"])
         except ClientError as e:
-            # Catch any errors and send it back
             await self.send_json({"error": e.code})
 
     async def disconnect(self, code):
@@ -71,15 +72,18 @@ class ChatConsumer(AsyncJsonWebsocketConsumer):
         # The logged-in user is in our scope thanks to the authentication ASGI middleware
         room = await get_room_or_error(room_id, self.scope["user"])
         # Send a join message if it's turned on
-        if settings.NOTIFY_USERS_ON_ENTER_OR_LEAVE_ROOMS:
-            await self.channel_layer.group_send(
-                room.group_name,
-                {
-                    "type": "chat.join",
-                    "room_id": room_id,
-                    "username": self.scope["user"].username,
-                }
-            )
+        level = Level.objects.get(room=room, number=1)
+        field = level.field
+        start_x = level.start_x
+        start_y = level.start_y
+        await self.channel_layer.group_send(
+            room.group_name,
+            {
+                "type": "chat.join",
+                "room_id": room_id,
+                "username": self.scope["user"].username,
+            }
+        )
         # Store that we're in the room
         self.rooms.add(room_id)
         # Add them to the group so they get room messages
@@ -91,6 +95,7 @@ class ChatConsumer(AsyncJsonWebsocketConsumer):
         await self.send_json({
             "join": str(room.id),
             "title": room.title,
+            'message': {'start_x': start_x, 'start_y': start_y, 'field': field}
         })
 
     async def leave_room(self, room_id):
@@ -100,15 +105,14 @@ class ChatConsumer(AsyncJsonWebsocketConsumer):
         # The logged-in user is in our scope thanks to the authentication ASGI middleware
         room = await get_room_or_error(room_id, self.scope["user"])
         # Send a leave message if it's turned on
-        if settings.NOTIFY_USERS_ON_ENTER_OR_LEAVE_ROOMS:
-            await self.channel_layer.group_send(
-                room.group_name,
-                {
-                    "type": "chat.leave",
-                    "room_id": room_id,
-                    "username": self.scope["user"].username,
-                }
-            )
+        await self.channel_layer.group_send(
+            room.group_name,
+            {
+                "type": "chat.leave",
+                "room_id": room_id,
+                "username": self.scope["user"].username,
+            }
+        )
         # Remove that we're in the room
         self.rooms.discard(room_id)
         # Remove them from the group so they no longer get room messages
@@ -125,8 +129,9 @@ class ChatConsumer(AsyncJsonWebsocketConsumer):
         """
         Called by receive_json when someone sends a message to a room.
         """
-        # Check they are in this room
-        if room_id not in self.rooms:
+        # print(message)
+        new_x, new_y = move(message)
+        if room_id not in self.rooms:  # Check they are in this room
             raise ClientError("ROOM_ACCESS_DENIED")
         # Get the room and send to the group about it
         room = await get_room_or_error(room_id, self.scope["user"])
@@ -136,7 +141,7 @@ class ChatConsumer(AsyncJsonWebsocketConsumer):
                 "type": "chat.message",
                 "room_id": room_id,
                 "username": self.scope["user"].username,
-                "message": message,
+                "message": {'new_x': new_x, 'new_y': new_y},
             }
         )
 
