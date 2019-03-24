@@ -36,9 +36,9 @@ window.onload = function() {
     [{'obj': 'wall', 'alpha': 1}, {'obj': 'wall', 'alpha': 1}, {'obj': 'wall', 'alpha': 1}, {'obj': 'wall', 'alpha': 1}, {'obj': 'wall', 'alpha': 1}, {'obj': 'wall', 'alpha': 1}, {'obj': 'wall', 'alpha': 1}, {'obj': 'wall', 'alpha': 1}, {'obj': 'wall', 'alpha': 1}, {'obj': 'wall', 'alpha': 1}, {'obj': 'wall', 'alpha': 1}, {'obj': 'wall', 'alpha': 1}, {'obj': 'wall', 'alpha': 1}, {'obj': 'wall', 'alpha': 1}, {'obj': 'wall', 'alpha': 1}, {'obj': 'wall', 'alpha': 1}, {'obj': 'wall', 'alpha': 1}, {'obj': 'wall', 'alpha': 1}, {'obj': 'wall', 'alpha': 1}, {'obj': 'wall', 'alpha': 1}, {'obj': 'floor', 'alpha': 1}, {'obj': 'floor', 'alpha': 1}, {'obj': 'floor', 'alpha': 1}, {'obj': 'floor', 'alpha': 1}, {'obj': 'floor', 'alpha': 1}, {'obj': 'floor', 'alpha': 1}, {'obj': 'floor', 'alpha': 1}, {'obj': 'floor', 'alpha': 1}, {'obj': 'floor', 'alpha': 1}, {'obj': 'floor', 'alpha': 1}, {'obj': 'floor', 'alpha': 1}, {'obj': 'floor', 'alpha': 1}, {'obj': 'floor', 'alpha': 1}, {'obj': 'floor', 'alpha': 1}, {'obj': 'wall', 'alpha': 1}, {'obj': 'none'}, {'obj': 'none'}, {'obj': 'none'}, {'obj': 'none'}, {'obj': 'none'}, {'obj': 'none'}, {'obj': 'none'}, {'obj': 'none'}, {'obj': 'none'}, {'obj': 'none'}, {'obj': 'none'}, {'obj': 'none'}, {'obj': 'none'}, {'obj': 'none'}, {'obj': 'none'}, {'obj': 'none'}, {'obj': 'none'}, {'obj': 'none'}, {'obj': 'none'}, {'obj': 'none'}, {'obj': 'none'}, {'obj': 'none'}, {'obj': 'none'}, {'obj': 'none'}, {'obj': 'none'}],
     [{'obj': 'none', 'alpha': 1}, {'obj': 'none'}, {'obj': 'none'}, {'obj': 'none'}, {'obj': 'none'}, {'obj': 'none'}, {'obj': 'none'}, {'obj': 'none'}, {'obj': 'none'}, {'obj': 'none'}, {'obj': 'none'}, {'obj': 'none'}, {'obj': 'none'}, {'obj': 'none'}, {'obj': 'none'}, {'obj': 'none'}, {'obj': 'none'}, {'obj': 'none'}, {'obj': 'none'}, {'obj': 'wall', 'alpha': 1}, {'obj': 'wall', 'alpha': 1}, {'obj': 'wall', 'alpha': 1}, {'obj': 'wall', 'alpha': 1}, {'obj': 'wall', 'alpha': 1}, {'obj': 'wall', 'alpha': 1}, {'obj': 'wall', 'alpha': 1}, {'obj': 'wall', 'alpha': 1}, {'obj': 'wall', 'alpha': 1}, {'obj': 'wall', 'alpha': 1}, {'obj': 'wall', 'alpha': 1}, {'obj': 'wall', 'alpha': 1}, {'obj': 'wall', 'alpha': 1}, {'obj': 'wall', 'alpha': 1}, {'obj': 'wall', 'alpha': 1}, {'obj': 'wall', 'alpha': 1}, {'obj': 'none'}, {'obj': 'none'}, {'obj': 'none'}, {'obj': 'none'}, {'obj': 'none'}, {'obj': 'none'}, {'obj': 'none'}, {'obj': 'none'}, {'obj': 'none'}, {'obj': 'none'}, {'obj': 'none'}, {'obj': 'none'}, {'obj': 'none'}, {'obj': 'none'}, {'obj': 'none'}, {'obj': 'none'}, {'obj': 'none'}, {'obj': 'none'}, {'obj': 'none'}, {'obj': 'none'}, {'obj': 'none'}, {'obj': 'none'}, {'obj': 'none'}, {'obj': 'none'}, {'obj': 'none', 'alpha': 1}]
 ]
-
+    var username = ''
     var map = []
-
+    var monsters = {}
 
     var mouse_x = 0;
     var mouse_y = 0;
@@ -159,7 +159,7 @@ window.onload = function() {
         for(var cur_clm=0; cur_clm<60; cur_clm++) {
             for(var cur_row=0; cur_row<30; cur_row++) {
                 if (map[cur_row][cur_clm]['obj'] == undefined) {
-                    console.log(cur_row, cur_clm);
+                    // console.log(cur_row, cur_clm);
                 }
 
                 if (map[cur_row][cur_clm]['obj'] == 'wall') {
@@ -187,6 +187,13 @@ window.onload = function() {
                 }
                 if (cur_row==player_y && cur_clm==player_x) {
                     drawPlayer(player_x, player_y, wid, hei);
+                }
+
+
+                for(var key in monsters) {
+                    if (monsters[key].x==cur_clm && monsters[key].y==cur_row) {
+                        drawPlayer(monsters[key].x, monsters[key].y, wid, hei);
+                    }
                 }
 
                 if (cur_row==monster_y && cur_clm==monster_x) {
@@ -340,20 +347,24 @@ window.onload = function() {
 
 
     // Handle incoming messages
+
     socket.onmessage = function (message) {
-        // Decode the JSON
-        console.log("Got websocket message " + message.data);
+
+        console.log("Got websocket message " + message.data);  // Decode the JSON
         var data = JSON.parse(message.data);
-        // Handle errors
-        if (data.error) {
+
+        if (data.error) {  // Handle errors
             alert(data.error);
             return;
         }
-        // Handle joining
-        if (data.join) {
+
+        if (data.join) {  // Handle joining
+
             console.log("Joining room " + data.join);
 
             map = data.message.field;
+            username = data.message.username;
+            console.log('Saved local var username', data.message.username)
             player_x = data.message.start_x;
             player_y = data.message.start_y;
 
@@ -372,10 +383,19 @@ window.onload = function() {
 
             // hook up mouse click
             stage.addEventListener('click', function(evnt) {
+                if (collision(tileX, tileY)) {
+                    return;
+                }
                 socket.send(JSON.stringify({
                     "command": "send",
                     "room": data.join,
-                    "message": {'old_x': player_x, 'old_y': player_y, 'new_x': tileX, 'new_y': tileY}
+                    "message": {
+                        'username': data.message.username,
+                        'old_x': player_x,
+                        'old_y': player_y,
+                        'new_x': tileX,
+                        'new_y': tileY
+                    }
                 }));
             }, false);
 
@@ -400,55 +420,66 @@ window.onload = function() {
                 return false;
             });
             $("#chats").append(roomdiv);
-            // Handle leaving
-        } else if (data.leave) {
+
+
+        } else if (data.leave) { // Handle leaving
+
             console.log("Leaving room " + data.leave);
             $("#room-" + data.leave).remove();
             map = []
-            // Handle getting a message
-        } else if (data.message || data.msg_type != 0) {
+
+
+        } else if (data.message || data.msg_type != 0) {  // Handle getting a message
+
             var msgdiv = $("#room-" + data.room + " .messages");
             var ok_msg = "";
             // msg types are defined in chat/settings.py
             // Only for demo purposes is hardcoded, in production scenarios, consider call a service.
             // console.log(data.msg_type)
             switch (data.msg_type) {
-                case 0:
-                    // Message
-                    player_x = data.message.new_x
-                    player_y = data.message.new_y
-                    new_draw_start_x = 900 - ( (player_x) * cell_width/2 ) + ( (player_y) * cell_width/2 );
-                    new_draw_start_y = 450 - ( (player_y) * cell_height/2 ) - ( (player_x) * cell_height/2 );
+                case 0: // Message
+
+                    if (data.username == username) {
+                        player_x = data.message.new_x;
+                        player_y = data.message.new_y;
+                        new_draw_start_x = 900 - ( (player_x) * cell_width/2 ) + ( (player_y) * cell_width/2 );
+                        new_draw_start_y = 450 - ( (player_y) * cell_height/2 ) - ( (player_x) * cell_height/2 );
+                    }
+                    else {
+                        console.log('>>> monsters', monsters);
+                        console.log('>>> another player moved', data.username);
+                        monsters[data.username] = {'x': data.message.new_x, 'y': data.message.new_y};
+                    }
 
                     // ok_msg = "<div class='message'>" +
                     //         "<span class='username'>" + data.username + "</span>" +
                     //         "<span class='body'>" + data.message + "</span>" +
                     //         "</div>";
                     break;
-                case 1:
-                    // Warning / Advice messages
+                case 1: // Warning / Advice messages
+
                     ok_msg = "<div class='contextual-message text-warning'>" + data.message +
                             "</div>";
                     break;
-                case 2:
-                    // Alert / Danger messages
+                case 2: // Alert / Danger messages
+
                     ok_msg = "<div class='contextual-message text-danger'>" + data.message +
                             "</div>";
                     break;
-                case 3:
-                    // "Muted" messages
+                case 3: // "Muted" messages
+
                     ok_msg = "<div class='contextual-message text-muted'>" + data.message +
                             "</div>";
                     break;
-                case 4:
-                    // User joined room
-                    map = map_loaded;
+                case 4:  // User joined room
+                    monsters[data.username] = {'x': data.x, 'y': data.y };
+                    console.log('>>> pushed to monsters', data.username);
                     ok_msg = "<div class='contextual-message text-muted'>" + data.username +
                             " joined the room!" +
                             "</div>";
                     break;
-                case 5:
-                    // User left room
+                case 5:  // User left room
+                    delete monsters[data.username]
                     ok_msg = "<div class='contextual-message text-muted'>" + data.username +
                             " left the room!" +
                             "</div>";
@@ -459,10 +490,14 @@ window.onload = function() {
             }
             msgdiv.append(ok_msg);
             msgdiv.scrollTop(msgdiv.prop("scrollHeight"));
+
         } else {
+
             console.log("Cannot handle message!");
+
         }
     };
+
     // Says if we joined a room or not by if there's a div for it
     inRoom = function (roomId) {
         return $("#room-" + roomId).length > 0;
