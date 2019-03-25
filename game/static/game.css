@@ -8,5 +8,12 @@ html, body {
 #cnvs {
     height: 800px;
     width:  1295px;
-    border: 1px solid gray;
+ /*   height: 1000px;
+    width:  1900px;*/
+    /*border: 1px solid gray;*/
+
+      top: 0;
+      left: 0;
+
+      box-shadow: 0 0 200px rgba(0,0,0,0.9) inset;
 }
