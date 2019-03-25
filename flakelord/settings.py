@@ -6,7 +6,7 @@ SECRET_KEY = '&lvp@i(-i-zh&v0+=yh4w#1_o$w!+oo!(q-fmb7m^dm*z_a!k9'
 
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 INSTALLED_APPS = [
     'channels',
@@ -36,12 +36,12 @@ ASGI_APPLICATION = 'flakelord.routing.application'
 
 ##### Project-specific settings
 
-MSG_TYPE_MESSAGE = 0  # For standard messages
-MSG_TYPE_WARNING = 1  # For yellow messages
-MSG_TYPE_ALERT = 2  # For red & dangerous alerts
-MSG_TYPE_MUTED = 3  # For just OK information that doesn't bother users
-MSG_TYPE_ENTER = 4  # For just OK information that doesn't bother users
-MSG_TYPE_LEAVE = 5  # For just OK information that doesn't bother users
+MSG_TYPE_MESSAGE = 'message'  # For standard messages
+MSG_TYPE_WARNING = 'warning'  # For yellow messages
+MSG_TYPE_ALERT = 'alert'  # For red & dangerous alerts
+MSG_TYPE_MUTED = 'muted'  # For just OK information that doesn't bother users
+MSG_TYPE_ENTER = 'enter'  # For just OK information that doesn't bother users
+MSG_TYPE_LEAVE = 'leave'  # For just OK information that doesn't bother users
 
 MESSAGE_TYPES_CHOICES = (
     (MSG_TYPE_MESSAGE, 'MESSAGE'),
@@ -97,7 +97,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'flakelord',
         'USER': 'postgres',
-        'PASSWORD': 'ut'
+        'PASSWORD': 'qwerasdf'
     }
 }
 

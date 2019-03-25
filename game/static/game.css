@@ -1,12 +1,12 @@
 html, body {
-  width:  100%;
-  height: 100%;
-  margin: 0px;
-  background-color: black;
-
+    width:  100%;
+    height: 100%;
+    margin: 0px;
+    background-color: black;
 }
 
 #cnvs {
-    height: 900px;
-    width: 1800px;
+    height: 800px;
+    width:  1295px;
+    border: 1px solid gray;
 }

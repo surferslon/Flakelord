@@ -31,9 +31,9 @@ class ChatConsumer(AsyncJsonWebsocketConsumer):
         Called when we get a text frame. Channels will JSON-decode the payload
         for us and pass it as the first argument.
         """
+        print(content)
 
-        # Messages will have a "command" key we can switch on
-        command = content.get("command", None)
+        command = content.get("command", None)  # Messages will have a "command" key we can switch on
         try:
             if command == "join":
                 await self.join_room(content["room"])
@@ -47,8 +47,7 @@ class ChatConsumer(AsyncJsonWebsocketConsumer):
     async def disconnect(self, code):
         """ Called when the WebSocket closes for any reason. """
 
-        # Leave all the rooms we are still in
-        for room_id in list(self.rooms):
+        for room_id in list(self.rooms):  # Leave all the rooms we are still in
             try:
                 await self.leave_room(room_id)
             except ClientError:
@@ -97,8 +96,8 @@ class ChatConsumer(AsyncJsonWebsocketConsumer):
 
         # The logged-in user is in our scope thanks to the authentication ASGI middleware
         room = await get_room_or_error(room_id, self.scope["user"])
-        # Send a leave message if it's turned on
-        await self.channel_layer.group_send(
+
+        await self.channel_layer.group_send(  # Send a leave message if it's turned on
             room.group_name,
             {
                 "type": "chat.leave",
@@ -121,10 +120,16 @@ class ChatConsumer(AsyncJsonWebsocketConsumer):
     async def send_room(self, room_id, message):
         """ Called by receive_json when someone sends a message to a room. """
 
-        print('>>> message', message)
-        new_x, new_y = move(message)
+        # print('>>> message', message)
+        if isinstance(message, dict):
+            new_x, new_y = move(message)
+        else:
+            print(message)
+            print(room_id)
+            return
         if room_id not in self.rooms:  # Check they are in this room
             raise ClientError("ROOM_ACCESS_DENIED")
+
         # Get the room and send to the group about it
         room = await get_room_or_error(room_id, self.scope["user"])
         await self.channel_layer.group_send(
@@ -144,7 +149,7 @@ class ChatConsumer(AsyncJsonWebsocketConsumer):
         """ Called when someone has joined our chat. """
         room = await get_room_or_error(event["room_id"], self.scope["user"])
         level = Level.objects.get(room=room, number=1)
-        await self.send_json(  # Send a message down to the client
+        await self.send_json(
             {
                 "msg_type": settings.MSG_TYPE_ENTER,
                 "room": event["room_id"],
@@ -157,7 +162,7 @@ class ChatConsumer(AsyncJsonWebsocketConsumer):
     async def chat_leave(self, event):
         """ Called when someone has left our chat. """
 
-        await self.send_json(  # Send a message down to the client
+        await self.send_json(
             {
                 "msg_type": settings.MSG_TYPE_LEAVE,
                 "room": event["room_id"],
@@ -168,7 +173,7 @@ class ChatConsumer(AsyncJsonWebsocketConsumer):
     async def chat_message(self, event):
         """ Called when someone has messaged our chat. """
 
-        await self.send_json(  # Send a message down to the client
+        await self.send_json(
             {
                 "msg_type": settings.MSG_TYPE_MESSAGE,
                 "room": event["room_id"],
