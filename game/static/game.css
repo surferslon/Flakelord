@@ -8,12 +8,13 @@ html, body {
 #cnvs {
     height: 800px;
     width:  1295px;
+    margin-top: 50px;
  /*   height: 1000px;
     width:  1900px;*/
     /*border: 1px solid gray;*/
 
-      top: 0;
-      left: 0;
+    top: 0;
+    left: 0;
 
-      box-shadow: 0 0 200px rgba(0,0,0,0.9) inset;
+    box-shadow: 0 0 200px rgba(0,0,0,0.9) inset;
 }
