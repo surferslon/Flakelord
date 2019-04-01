@@ -3,13 +3,14 @@
 {% load staticfiles %}
 
 {% block header %}
-	{{ block.super }} 
+	{{ block.super }}
     <link rel="stylesheet" href="{% static "game.css" %}">
-    <script src="{% static "game.js" %}"></script> 
+    <script src="{% static "game.js" %}"></script>
 {% endblock %}
 
 {% block content %}
     <center>
+
         <canvas id='cnvs'></canvas>
     </center>
 {% endblock %}

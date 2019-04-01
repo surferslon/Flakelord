@@ -143,6 +143,17 @@ window.onload = function() {
         ctx.drawImage(img_floor, x-cell_width/2, y);
     }
 
+    function drawArea(coord) {
+        let area_y = 500;
+        let area_x = 700;
+        if (coord.x < draw_center_x-area_x || coord.y < draw_center_y-area_y || coord.x > draw_center_x + area_x || coord.y > draw_center_y + area_y) {
+            return false;
+        }
+        else {
+            return true;
+        }
+    }
+
     function drawMap_background() {
 
         // Floor
@@ -154,6 +165,9 @@ window.onload = function() {
 
                 if (map[cur_row][cur_clm]['obj'] == 'floor') {
                     coord = ConvertToCoord(cur_clm, cur_row);
+                    if ( !drawArea(coord) ) {
+                        continue;
+                    }
                     drawFloor(coord.x, coord.y);
                 }
             }
@@ -168,9 +182,10 @@ window.onload = function() {
 
                 if (map[cur_row][cur_clm]['obj'] == 'wall') {
                     coord = ConvertToCoord(cur_clm, cur_row);
-                    if (coord.x<-100 | coord.y<-100 | coord.x>1900 | coord.y>1000) {
+                    if ( !drawArea(coord) ) {
                         continue;
                     }
+
                     // if ( Math.abs(cur_row - player_y) < 4 && Math.abs(cur_clm - player_x) < 4 ) {
                     let diff_x = cur_clm - player_x;
                     let diff_y = cur_row - player_y;
