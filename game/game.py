@@ -1,22 +1,39 @@
 import random
+import time
 
 
-def generate_field():
+def print_field(field):
+    str_field = ''
+    for row in field:
+        str_field += ''.join(row) + '\n'
+    print(str_field)
+    print(60 * '-')
+    time.sleep(0.01)
+
+
+def generate_field(debug=False):
     height = 30
     width = 60
     field = []
     floor = {'obj': 'floor', 'alpha': 1}
     wall = {'obj': 'wall', 'alpha': 1}
     none = {'obj': 'none', 'alpha': 1}
+    stairway = {'obj': 'stairway', 'alpha': 1}
+    if debug:
+        floor = '.'
+        wall = '#'
+        none = ' '
+        stairway = '>'
     max_count = 12
     max_size = 5
-    startx = random.choice(range(2, width - 1))
-    starty = random.choice(range(2, height - 1))
+    level_start_x = startx = random.choice(range(2, width - 1))
+    level_start_y = starty = random.choice(range(2, height - 1))
     cells = [none for x in range(width)]
     field = [cells[:] for y in range(height)]  # fill with None
 
     room_count = random.choice(range(2, max_count))
     for i in range(room_count):
+        # room
         room_size = random.choice(range(2, max_size))
         for curx in range(startx - room_size, startx + room_size):
             if curx < 1 or curx > width - 2:
@@ -26,42 +43,47 @@ def generate_field():
                     continue
                 field[cury][curx] = floor
 
-                for tmp_x in range(curx-1, curx+2):  # draw wall only around floor
-                    for tmp_y in range(cury-1, cury+2):
-                        if field[tmp_y][tmp_x] != floor:
-                            field[tmp_y][tmp_x] = wall
+                if debug:
+                    print_field(field)
 
+        # corridor
         if i + 1 != room_count:
             oldx = startx
             oldy = starty
             startx = random.choice(range(2, width - 1))
             starty = random.choice(range(2, height - 1))
             while oldx != startx:
-                if oldx > startx: oldx -= 1
-                else:             oldx += 1
+                oldx = oldx - 1 if oldx > startx else oldx + 1
                 field[oldy][oldx] = floor
 
-                for tmp_x in range(oldx-1, oldx+2):  # draw wall around floor
-                    for tmp_y in range(oldy-1, oldy+2):
-                        if field[tmp_y][tmp_x] != floor:
-                            field[tmp_y][tmp_x] = wall
+                if debug:
+                    print_field(field)
 
             while oldy != starty:
-                if oldy > starty: oldy -= 1
-                else:             oldy += 1
+                oldy = oldy - 1 if oldy > starty else oldy + 1
                 field[oldy][oldx] = floor
+                if debug:
+                    print_field(field)
 
-                for tmp_x in range(oldx-1, oldx+2):  # draw wall around floor
-                    for tmp_y in range(oldy-1, oldy+2):
-                        if field[tmp_y][tmp_x] != floor:
-                            field[tmp_y][tmp_x] = wall
-        else:
-            field[starty][startx] = '>'
-            endx = startx
-            endy = starty
-        field[starty][startx] = '<'
+    # walls around floor
+    for check_x in range(width):
+        for check_y in range(height):
+            for tmp_x in range(check_x - 1, check_x + 2):
+                for tmp_y in range(check_y - 1, check_y + 2):
+                    if field[check_y][check_x] == floor and field[tmp_y][tmp_x] == none:
+                        field[tmp_y][tmp_x] = wall
+                        if debug:
+                            print_field(field)
 
-    # startx = startx + 15 - starty
+    field[level_start_y][level_start_x] = stairway  # stairway in the first room
+    if debug:
+        print_field(field)
+    field[starty][startx] = stairway  # stairway in the last room
+    if debug:
+        print_field(field)
+
+    if debug:
+        return 'done'
 
     return field, startx, starty
 

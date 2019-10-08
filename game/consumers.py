@@ -31,7 +31,7 @@ class ChatConsumer(AsyncJsonWebsocketConsumer):
         Called when we get a text frame. Channels will JSON-decode the payload
         for us and pass it as the first argument.
         """
-        print(content)
+        # print(content)
 
         command = content.get("command", None)  # Messages will have a "command" key we can switch on
         try:
@@ -124,8 +124,8 @@ class ChatConsumer(AsyncJsonWebsocketConsumer):
         if isinstance(message, dict):
             new_x, new_y = move(message)
         else:
-            print(message)
-            print(room_id)
+            # print(message)
+            # print(room_id)
             return
         if room_id not in self.rooms:  # Check they are in this room
             raise ClientError("ROOM_ACCESS_DENIED")

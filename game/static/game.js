@@ -72,11 +72,13 @@ window.onload = function() {
     var img_player_r = new Image();
     var img_wall = new Image();
     var img_floor = new Image();
+    var img_stairway = new Image();
 
     img_player_l.src = '/static/img/player_l.png';
     img_player_r.src = '/static/img/player_r.png';
     img_wall.src   = '/static/img/wall0.png';
     img_floor.src  = '/static/img/floor.png';
+    img_stairway.src = '/static/img/stairway.png';
 
     var monster_x = 18;
     var monster_y = 15;
@@ -103,7 +105,6 @@ window.onload = function() {
     function drawPlayer(x, y, wid, hei) {
         coords = ConvertToCoord(x, y)
         drawRhomb(coords.x, coords.y);
-        console.log(player_dir)
         if (player_dir=='r'){
             ctx.drawImage(img_player_r, coords.x-cell_width/4, coords.y-cell_height+30);
         }
@@ -138,9 +139,11 @@ window.onload = function() {
     function drawWall(x, y) {
         ctx.drawImage(img_wall, x-cell_width/2, y-cell_height-35);
     }
-
     function drawFloor(x, y) {
         ctx.drawImage(img_floor, x-cell_width/2, y);
+    }
+    function drawStairway(x, y){
+        ctx.drawImage(img_stairway, x-cell_width/2, y);
     }
 
     function drawArea(coord) {
@@ -159,16 +162,17 @@ window.onload = function() {
         // Floor
         for(var cur_clm=0; cur_clm<60; cur_clm++) {
             for(var cur_row=0; cur_row<30; cur_row++) {
-
-                // let cell_x = (600 + cur_clm * cell_width / 2) - cur_row * cell_width / 2;
-                // let cell_y = cur_clm * cell_height / 2 + cur_row * cell_height / 2;
-
-                if (map[cur_row][cur_clm]['obj'] == 'floor') {
-                    coord = ConvertToCoord(cur_clm, cur_row);
-                    if ( !drawArea(coord) ) {
-                        continue;
-                    }
-                    drawFloor(coord.x, coord.y);
+                coord = ConvertToCoord(cur_clm, cur_row);
+                if ( !drawArea(coord) ) {
+                    continue;
+                }
+                switch (map[cur_row][cur_clm]['obj']) {
+                    case 'floor':
+                        drawFloor(coord.x, coord.y);
+                        break;
+                    case 'stairway':
+                        drawStairway(coord.x, coord.y);
+                        break;
                 }
             }
         }
@@ -237,19 +241,19 @@ window.onload = function() {
 
     }
 
-    // document.onkeydown = function(event) {
-    //     var key = event.keyCode; //Key code of key pressed
-    //     // console.log(key);
+    document.onkeydown = function(event) {
+        var key = event.keyCode;
+        // console.log(key);
 
     //     if(key === 68 && player_x<=1200 && !collision(player_x+1, player_y-1)) {
     //         player_x = player_x+1;
     //         player_y = player_y-1;
     //         player_dir = 'r';
-    //         // draw_start_x = draw_start_x-cell_width;
+    //          // draw_start_x = draw_start_x-cell_width;
 
-    //         new_draw_start_x = new_draw_start_x-cell_width;
+    // //         new_draw_start_x = new_draw_start_x-cell_width;
 
-    //     } // right
+    //      } // right
     //     else if(key === 69 && x>0 && !collision(player_x, player_y-1)) {
     //         player_y = player_y-1;
     //         player_dir = 'r';
@@ -301,7 +305,7 @@ window.onload = function() {
     //     else if (monster_y < player_y)  {
     //         monster_y = monster_y + 1;  }
 
-    // }
+    }
 
 
     stage.addEventListener('mousemove', function(evnt) {
@@ -315,17 +319,28 @@ window.onload = function() {
         tileY = Math.round((mouse_y - draw_start_y) / cell_height - (mouse_x-draw_start_x) / cell_width);
 
         coord = ConvertToCoord(tileX, tileY);
+
+        if (tileX > player_x || tileY < player_y) {
+            player_dir = 'r'
+        }
+        else {
+            player_dir = 'l'
+        }
+
         drawRhomb(coord.x, coord.y);
 
         ctx.font = "15px Courier";
         ctx.fillStyle = 'white';
 
         if (tileY < 30 && tileY >= 0 && tileX <= 60 && tileX >= 0) {
-            ctx.fillText(map[tileY][tileX]['obj'], coord.x+20, coord.y);
+            if (map[tileY][tileX]) {
+                ctx.fillText(map[tileY][tileX]['obj'], coord.x+20, coord.y);
+            }
         }
         else if (tileY == player_y && tileX == player_x) {
             ctx.fillText("Player", coord.x+20, coord.y);
         }
+
     }
 
     var FPS = 20;
@@ -402,30 +417,83 @@ window.onload = function() {
 
             // hook up mouse click
             stage.addEventListener('click', function(evnt) {
-                console.log(tileX);
-                console.log(player_x);
                 if (tileX > player_x || tileY < player_y) {
                     player_dir = 'r'
                 }
                 else {
                     player_dir = 'l'
                 }
-                socket.send(JSON.stringify({
-                    "command": "send",
-                    "room": data.join,
-                    "message": {
-                        'username': data.message.username,
-                        'old_x': player_x,
-                        'old_y': player_y,
-                        'new_x': tileX,
-                        'new_y': tileY
-                    }
-                }));
+                // socket.send(JSON.stringify({
+                //     "command": "send",
+                //     "room": data.join,
+                //     "message": {
+                //         'username': data.message.username,
+                //         'old_x': player_x,
+                //         'old_y': player_y,
+                //         'new_x': tileX,
+                //         'new_y': tileY
+                //     }
+                // }));
             }, false);
 
             // Hook up hotkey
             document.onkeydown = function(event) {
-                var key = event.keyCode;
+                let key = event.keyCode;
+                let new_x;
+                let new_y;
+                console.log(key)
+                switch (key) {
+                    case 87:  // up
+                        new_x = player_x-1;
+                        new_y = player_y-1;
+                        break;
+                    case 81:  // up left
+                        new_x = player_x-1;
+                        new_y = player_y;
+                        break;
+                    case 69:  // up right
+                        new_x = player_x;
+                        new_y = player_y-1;
+                        break;
+                    case 88:  // down
+                        new_x = player_x+1;
+                        new_y = player_y+1;
+                        break;
+                    case 90:  // down left
+                        new_x = player_x;
+                        new_y = player_y+1;
+                        break;
+                    case 67:  // down right
+                        new_x = player_x+1;
+                        new_y = player_y;
+                        break;
+                    case 68:  // right
+                        new_x = player_x+1;
+                        new_y = player_y-1;
+                        break;
+                    case 65:  // left
+                        new_x = player_x-1;
+                        new_y = player_y+1;
+                        break;
+                    default:
+                        return;
+                }
+                if (new_x && new_y) {
+                    socket.send(JSON.stringify({
+                        "command": "send",
+                        "room": data.join,
+                        "message": {
+                            'username': data.message.username,
+                            'old_x': player_x,
+                            'old_y': player_y,
+                            'new_x': new_x,
+                            'new_y': new_y
+                        }
+                    }));
+                }
+
+                return;
+
                 socket.send(JSON.stringify({
                     "command": "send",
                     "room": data.join,
