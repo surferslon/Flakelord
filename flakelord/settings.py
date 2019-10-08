@@ -97,7 +97,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'flakelord',
         'USER': 'postgres',
-        'PASSWORD': 'qwerasdf'
+        'PASSWORD': 'qraf'
     }
 }
 
