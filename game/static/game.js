@@ -57,8 +57,8 @@ window.onload = function() {
 
     var img_monster_l = new Image();
     var img_monster_r = new Image();
-    img_monster_r.src = '/static/img/chars/ork/left.png'
-    img_monster_r.src = '/static/img/chars/ork/left.png'
+    img_monster_r.src = '/static/img/chars/dwarf/left.png'
+    img_monster_r.src = '/static/img/chars/dwarf/left.png'
 
     var tileX
     var tileY
