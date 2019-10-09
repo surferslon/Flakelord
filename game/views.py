@@ -14,21 +14,19 @@ def user_signup(request):
             return HttpResponseRedirect('/', args=[request.user.username])
     else:
         form = UserCreationForm()
-
     return render(request, 'registration/signup.html', {'form': form})
 
 
 class GameView(TemplateView):
-    def get(self, request, **kwargs):
-        return render(request, 'game.html', context=None)
+    template_name = 'game.html'
 
 
 class MenuView(TemplateView):
-    def get(self, request, **kwargs):
-        # import ipdb; ipdb.set_trace()
+    template_name = 'index.html'
+
+    def get_context_data(self, **kwargs):
         rooms = Room.objects.order_by("title")
-        context = {
-            'username': request.user.username,
+        return {
+            'username': self.request.user.username,
             "rooms": rooms,
         }
-        return render(request, 'index.html', context=context)

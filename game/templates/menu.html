@@ -4,17 +4,18 @@
 
 {% block header %}
     {{ block.super }}
-    <link rel="stylesheet" href="{% static "menu.css" %}">
+    <link rel="stylesheet" href="{% static 'menu.css' %}">
 {% endblock %}
 
 {% block content %}
     <div class='wrapper'>
         <div class='menu_form'>
 
+            <select>
             <h2> {{ username }} </h2>
             <a href='game/'>Play</a>
             <a href='accounts/logout/'>Logout</a>
-            
+
         </div>
     </div>
 {% endblock %}

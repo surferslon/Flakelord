@@ -1,7 +1,19 @@
 from django.db import models
 from django.contrib.postgres.fields import JSONField
+# from django.contrib.auth.models import AbstractUser, PermissionsMixin
+from django.conf import settings
 
 from game.game import generate_field
+
+
+# class User(AbstractUser, PermissionsMixin):
+#     username = models.CharField(max_length=12)
+#     email = models.EmailField('email address', unique=True)
+#     character = models.CharField(max_length=255, choices=settings.AVAILABLE_CHARACTERS, default='rogue')
+
+#     class Meta:
+#         verbose_name = 'user'
+#         verbose_name_plural = 'users'
 
 
 class Room(models.Model):

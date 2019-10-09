@@ -17,8 +17,6 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-
-
 ]
 
 redis_host = os.environ.get('REDIS_HOST', 'localhost')
@@ -32,7 +30,7 @@ CHANNEL_LAYERS = {
     },
 }
 
-ASGI_APPLICATION = 'flakelord.routing.application'
+ASGI_APPLICATION = 'core.routing.application'
 
 ##### Project-specific settings
 
@@ -71,7 +69,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'flakelord.urls'
+ROOT_URLCONF = 'core.urls'
 
 TEMPLATES = [
     {
@@ -89,7 +87,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'flakelord.wsgi.application'
+WSGI_APPLICATION = 'core.wsgi.application'
 
 
 DATABASES = {
@@ -131,3 +129,11 @@ STATIC_URL = '/static/'
 LOGIN_REDIRECT_URL = '/'
 
 AUTH_PASSWORD_VALIDATORS = []
+
+# AUTH_USER_MODEL = "users_management.UserManage"
+
+AVAILABLE_CHARACTERS = (
+    'rogue',
+    'ork',
+    'grandpa',
+)

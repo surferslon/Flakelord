@@ -4,13 +4,14 @@
 
 {% block header %}
 	{{ block.super }}
-    <link rel="stylesheet" href="{% static "game.css" %}">
-    <script src="{% static "game.js" %}"></script>
+    <link rel="stylesheet" href="{% static 'game.css' %}">
+    <script src="{% static 'game.js' %}"></script>
+    <script src="{% static 'reconnecting-websocket.min.js' %}"></script>
+    <script src="{% static 'jquery-1.12.2.min.js' %}"></script>
 {% endblock %}
 
 {% block content %}
     <center>
-
         <canvas id='cnvs'></canvas>
     </center>
 {% endblock %}
