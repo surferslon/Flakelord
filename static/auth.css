@@ -60,4 +60,8 @@ button {
     height: 400px;
     flex-direction: column;
 }
+.error-list {
+    margin: 20px;
+    color: #e16666;
+}
 

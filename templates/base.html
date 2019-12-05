@@ -3,18 +3,19 @@
 
 {% load staticfiles %}
 
+<script src="{% static 'jquery-1.12.2.min.js' %}" type="text/javascript"></script>
+
 <head>
     <meta charset="UTF-8">
     <title>Flakelord</title>
 	{% block header %}
 		<link rel="shortcut icon" type="image/png" href="{% static 'favicon.ico' %}"/>
-        <link rel="stylesheet" href="{% static "style.css" %}" type="text/css" media="screen" />
+        <link rel="stylesheet" href="{% static 'style.css' %}" type="text/css" media="screen" />
 	{% endblock %}
 </head>
 
 <body>
-    {% block content %}
-    {% endblock %}
+    {% block content %} {% endblock %}
 </body>
 
 </HTML>

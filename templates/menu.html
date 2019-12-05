@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+
+{% load staticfiles %}
+
+{% block header %}
+    {{ block.super }}
+    <link rel="stylesheet" href="{% static 'menu.css' %}">
+    <script src="{% static 'menu.js' %}"></script>
+{% endblock %}
+
+{% block content %}
+    <div class='wrapper'>
+        <div class='menu-grid'>
+            <div class="grid-item-info grid-item">
+                <h2> {{ username }} </h2>
+                <p>Score: 0</p>
+            </div>
+            <div class="grid-item grid-item-img">
+                <img src="{% static 'img/chars/rogue/left.png' %}"></img>
+            </div>
+            <div class="grid-item" style="display:flex; align-items: end">
+                <a href='game/'>Create</a>
+            </div>
+            <div class="grid-item">
+            </div>
+            <div class="grid-item grid-item-buttons">
+                <a href='accounts/logout/'>Settings</a>
+                <br>
+                <a href='accounts/logout/'>Logout</a>
+            </div>
+            <div class="grid-item grid-item-games">
+               <div class="games-grid" >
+                    <div class="games-grid-header">
+                        Name
+                    </div>
+                    <div class="games-grid-header">
+                        Players
+                    </div>
+                    <div class="games-grid-header">
+                        Status
+                    </div>
+                    {% for room in rooms %}
+                        <div class="room-item">
+                            <a href="#" class="room-link" data-room-id="{{ room.id }}">
+                                {{ room.title }}
+                            </a>
+                        </div>
+                        <div href="#" class="room-item" style='text-align: center'>
+                            0/0
+                        </div>
+                        <div href="#" class="room-item" style='text-align: center'>
+                            new
+                        </div>
+                    {% endfor %}
+               </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

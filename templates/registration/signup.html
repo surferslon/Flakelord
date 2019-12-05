@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% load staticfiles %}
+
+{% block header %}
+    {{ block.super }}
+    <link rel="stylesheet" href="{% static 'auth.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class='wrapper'>
+
+    <img src="{% static 'img/logo.jpg' %}"></img>
+
+    <form class="auth_form" method="post">
+        {% csrf_token %}
+        <label>Name</label>
+        {{ form.username }}
+        <label>Password</label>
+        {{ form.password1 }}
+        <label>Confirm</label>
+        {{ form.password2 }}
+        <button type="submit" name="submit" value="Register"/>Register</button>
+        <div class='error-list'>
+            {% for field, error in form.errors.items %}
+                {{ error }}
+                </br>
+            {% endfor %}
+        </div>
+     </form>
+
+</div>
+{% endblock %}

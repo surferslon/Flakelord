@@ -1,20 +1,21 @@
-from django.shortcuts import render, redirect
-from django.views.generic import TemplateView
-from .models import Room
-from django.contrib import messages
+from django.views.generic import TemplateView, FormView
+from django.views.generic.edit import CreateView
 from django.contrib.auth.forms import UserCreationForm
-from django.http import HttpResponseRedirect
+from django.contrib.auth import login
+from django.contrib.auth.models import User
+from .models import Room
 
 
-def user_signup(request):
-    if request.method == 'POST':
-        form = UserCreationForm(request.POST)
-        if form.is_valid():
-            form.save()
-            return HttpResponseRedirect('/', args=[request.user.username])
-    else:
-        form = UserCreationForm()
-    return render(request, 'registration/signup.html', {'form': form})
+class RegistrationView(CreateView):
+    model = User
+    template_name = 'registration/signup.html'
+    form_class = UserCreationForm
+    success_url = '/'
+
+    def get_success_url(self, **kwargs):
+        url = super(RegistrationView, self).get_success_url(**kwargs)
+        login(self.request, self.object)
+        return url
 
 
 class GameView(TemplateView):
@@ -22,7 +23,7 @@ class GameView(TemplateView):
 
 
 class MenuView(TemplateView):
-    template_name = 'index.html'
+    template_name = 'menu.html'
 
     def get_context_data(self, **kwargs):
         rooms = Room.objects.order_by("title")

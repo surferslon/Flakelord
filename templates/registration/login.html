@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+
+{% load staticfiles %}
+
+{% block header %}
+    {{ block.super }}
+    <link rel="stylesheet" href="{% static 'auth.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class='wrapper'>
+
+     <img src="{% static 'img/logo.jpg' %}"></img>
+
+    <form class="auth_form" method="post" action="{% url 'login' %}">
+        {% csrf_token %}
+        <label>Name</label>
+        {{ form.username }}
+        <label>Password</label>
+        {{ form.password }}
+        <div>
+            <a href="/signup">Registration</a>
+            <button type="submit" value="login">Login</button>
+            <input  type="hidden" name="next" value="{{ next }}" />
+        </div>
+        <div class="error-list">
+        {% if form.errors %}
+            Username or password is incorrect
+        {% endif %}
+        </div>
+    </form>
+
+</div>
+{% endblock %}
