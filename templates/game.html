@@ -11,8 +11,21 @@
 {% endblock %}
 
 {% block content %}
-    <center>
-        <canvas id='cnvs'></canvas>
-    </center>
+    <div id='game-wrapper'>
+        <div id="game-table">
+            <div id="game-table-menu">
+                <a href="#" id="button-quit" data-url="{% url 'game:menu' %}">quit</a>
+            </div>
+            <div>
+                <div id="terminal">
+                </div>
+                <form id="chat-form">
+                    <input></input>
+                    <button>>>></button>
+                </form>
+            </div>
+            <canvas id='cnvs' data-game-id="{{ game_id }}" tabindex="1"></canvas>
+        </div>
+    </div>
 {% endblock %}
 

@@ -9,13 +9,6 @@ from game.game import move
 
 
 class ChatConsumer(AsyncJsonWebsocketConsumer):
-    """
-    This chat consumer handles websocket connections for chat clients.
-    It uses AsyncJsonWebsocketConsumer, which means all the handling functions
-    must be async functions, and any sync work (like ORM access) has to be
-    behind database_sync_to_async or sync_to_async. For more, read
-    http://channels.readthedocs.io/en/latest/topics/consumers.html
-    """
 
     async def connect(self):
         """ Called when the websocket is handshaking as part of initial connection. """
@@ -31,7 +24,6 @@ class ChatConsumer(AsyncJsonWebsocketConsumer):
         Called when we get a text frame. Channels will JSON-decode the payload
         for us and pass it as the first argument.
         """
-        # print(content)
 
         command = content.get("command", None)  # Messages will have a "command" key we can switch on
         try:
@@ -53,7 +45,7 @@ class ChatConsumer(AsyncJsonWebsocketConsumer):
             except ClientError:
                 pass
 
-    ##### Command helper methods called by receive_json
+    # Command helper methods called by receive_json
 
     async def join_room(self, room_id):
         """ Called by receive_json when someone sent a join command. """
@@ -119,30 +111,28 @@ class ChatConsumer(AsyncJsonWebsocketConsumer):
 
     async def send_room(self, room_id, message):
         """ Called by receive_json when someone sends a message to a room. """
-
-        # print('>>> message', message)
-        if isinstance(message, dict):
-            new_x, new_y = move(message)
-        else:
-            # print(message)
-            # print(room_id)
-            return
-        if room_id not in self.rooms:  # Check they are in this room
+        if room_id not in self.rooms:
             raise ClientError("ROOM_ACCESS_DENIED")
-
         # Get the room and send to the group about it
         room = await get_room_or_error(room_id, self.scope["user"])
+
+        if isinstance(message, dict):
+            new_x, new_y = move(message)
+            response = {'username': message['username'], 'new_x': new_x, 'new_y': new_y, 'resp_type': 'move'}
+        else:
+            response = {'text': message, 'resp_type': 'message'}
+
         await self.channel_layer.group_send(
             room.group_name,
             {
-                "type": "chat.message",
+                "type": 'chat.message',
                 "room_id": room_id,
                 "username": self.scope["user"].username,
-                "message": {'username': message['username'], 'new_x': new_x, 'new_y': new_y},
+                "message": response,
             }
         )
 
-    ##### Handlers for messages sent over the channel layer
+    # Handlers for messages sent over the channel layer
 
     # These helper methods are named by the types we send - so chat.join becomes chat_join
     async def chat_join(self, event):
@@ -172,7 +162,6 @@ class ChatConsumer(AsyncJsonWebsocketConsumer):
 
     async def chat_message(self, event):
         """ Called when someone has messaged our chat. """
-
         await self.send_json(
             {
                 "msg_type": settings.MSG_TYPE_MESSAGE,

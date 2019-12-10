@@ -41,7 +41,7 @@
                     </div>
                     {% for room in rooms %}
                         <div class="room-item">
-                            <a href="#" class="room-link" data-room-id="{{ room.id }}">
+                            <a href="{% url 'game:game' room.id %}" class="room-link" data-room-id="{{ room.id }}">
                                 {{ room.title }}
                             </a>
                         </div>

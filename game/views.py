@@ -1,7 +1,7 @@
 from django.views.generic import TemplateView, FormView
 from django.views.generic.edit import CreateView
-from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import login
+from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 from .models import Room
 

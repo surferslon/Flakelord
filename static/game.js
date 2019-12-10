@@ -1,4 +1,5 @@
-window.onload = function() {
+document.addEventListener('DOMContentLoaded', function() {
+    // {window.onload = function() {
     // 800 1295
     var stage       = document.getElementById('cnvs')
     var ctx         = stage.getContext('2d')
@@ -64,6 +65,13 @@ window.onload = function() {
     var tileY
     stage.width  = stage.offsetWidth;
     stage.height = stage.offsetHeight;
+    var terminal = $("#terminal")
+
+    function showMessage(message) {
+        let div_msg = "<div class='terminal-message'>" + message + "</div"
+        terminal.append(div_msg)
+        terminal.scrollTop(terminal.prop("scrollHeight"));
+    }
 
     function ConvertToCoord(x, y) {
         return {
@@ -72,10 +80,10 @@ window.onload = function() {
         }
     }
 
-    function drawPlayer(x, y, wid, hei) {
+    function drawPlayer(x, y, wid, hei, player_dir) {
         coords = ConvertToCoord(x, y)
         drawRhomb(coords.x, coords.y);
-        if (player_dir=='r'){
+        if (player_dir=='r' ){
             ctx.drawImage(img_player_r, coords.x-cell_width/4, coords.y-cell_height+30);
         }
         else {
@@ -112,7 +120,7 @@ window.onload = function() {
     function drawFloor(x, y) {
         ctx.drawImage(img_floor, x-cell_width/2, y);
     }
-    function drawStairway(x, y){
+    function drawStairway(x, y) {
         ctx.drawImage(img_stairway, x-cell_width/2, y);
     }
 
@@ -178,14 +186,15 @@ window.onload = function() {
                     drawWall(coord.x, coord.y);
                     ctx.globalAlpha = 1;
                 }
+
                 if (cur_row==player_y && cur_clm==player_x) {
-                    drawPlayer(player_x, player_y, wid, hei);
+                    drawPlayer(player_x, player_y, wid, hei, player_dir);
                 }
 
 
                 for(var key in monsters) {
                     if (monsters[key].x==cur_clm && monsters[key].y==cur_row) {
-                        drawPlayer(monsters[key].x, monsters[key].y, wid, hei);
+                        drawPlayer(monsters[key].x, monsters[key].y, wid, hei, null);
                     }
                 }
 
@@ -346,29 +355,37 @@ window.onload = function() {
     // Correctly decide between ws:// and wss://
     var ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
     var ws_path = ws_scheme + '://' + window.location.host + "/chat/stream/";
-    console.log("Connecting to " + ws_path);
+
+    showMessage("Connecting to " + ws_path)
+
     var socket = new ReconnectingWebSocket(ws_path);
 
+    socket.onopen = function () {
+        socket.send(JSON.stringify({
+            "command": "join",
+            "room": stage.dataset.gameId
+        }));
+        showMessage("Connected")
+    }
+    socket.onclose = function () {
+        showMessage("Disconnected")
+    }
+    socket.onmessage = function (message) {  // Handle incoming messages
 
-    // Handle incoming messages
-
-    socket.onmessage = function (message) {
-
-        console.log("Got websocket message " + message.data);  // Decode the JSON
         var data = JSON.parse(message.data);
 
-        if (data.error) {  // Handle errors
-            console.log(data.error);
+        if (data.error) {
+            showMessage("data.error")
             return;
         }
 
-        if (data.join) {  // Handle joining
+        if (data.join) {
 
-            console.log("Joining room " + data.join);
+            showMessage("Joining room " + data.join)
 
             map = data.message.field;
             username = data.message.username;
-            console.log('Saved local var username', data.message.username)
+            showMessage("Saved local var username " + data.message.username)
             player_x = data.message.start_x;
             player_y = data.message.start_y;
 
@@ -377,228 +394,169 @@ window.onload = function() {
             new_draw_start_x = draw_start_x;
             new_draw_start_y = draw_start_y;
 
-            var roomdiv = $(
-                    "<div class='room' id='room-" + data.join + "'>" +
-                    "<h2>" + data.title + "</h2>" +
-                    "<div class='messages'></div>" +
-                    // "<form><input><button>Send</button></form>" +
-                    "</div>"
-            );
+        } else if (data.leave) {
 
-            // hook up mouse click
-            stage.addEventListener('click', function(evnt) {
-                if (tileX > player_x || tileY < player_y) {
-                    player_dir = 'r'
-                }
-                else {
-                    player_dir = 'l'
-                }
-                // socket.send(JSON.stringify({
-                //     "command": "send",
-                //     "room": data.join,
-                //     "message": {
-                //         'username': data.message.username,
-                //         'old_x': player_x,
-                //         'old_y': player_y,
-                //         'new_x': tileX,
-                //         'new_y': tileY
-                //     }
-                // }));
-            }, false);
-
-            // Hook up hotkey
-            document.onkeydown = function(event) {
-                let key = event.keyCode;
-                let new_x;
-                let new_y;
-                console.log(key)
-                switch (key) {
-                    case 87:  // up
-                        new_x = player_x-1;
-                        new_y = player_y-1;
-                        break;
-                    case 81:  // up left
-                        new_x = player_x-1;
-                        new_y = player_y;
-                        break;
-                    case 69:  // up right
-                        new_x = player_x;
-                        new_y = player_y-1;
-                        break;
-                    case 88:  // down
-                        new_x = player_x+1;
-                        new_y = player_y+1;
-                        break;
-                    case 90:  // down left
-                        new_x = player_x;
-                        new_y = player_y+1;
-                        break;
-                    case 67:  // down right
-                        new_x = player_x+1;
-                        new_y = player_y;
-                        break;
-                    case 68:  // right
-                        new_x = player_x+1;
-                        new_y = player_y-1;
-                        break;
-                    case 65:  // left
-                        new_x = player_x-1;
-                        new_y = player_y+1;
-                        break;
-                    default:
-                        return;
-                }
-                if (new_x && new_y) {
-                    socket.send(JSON.stringify({
-                        "command": "send",
-                        "room": data.join,
-                        "message": {
-                            'username': data.message.username,
-                            'old_x': player_x,
-                            'old_y': player_y,
-                            'new_x': new_x,
-                            'new_y': new_y
-                        }
-                    }));
-                }
-
-                // return;
-
-                // socket.send(JSON.stringify({
-                //     "command": "send",
-                //     "room": data.join,
-                //     "message": key
-                // }));
-            }
-
-            // Hook up send button to send a message
-            roomdiv.find("form").on("submit", function () {
-                socket.send(JSON.stringify({
-                    "command": "send",
-                    "room": data.join,
-                    "message": roomdiv.find("input").val()
-                }));
-                roomdiv.find("input").val("");
-                return false;
-            });
-            $("#chats").append(roomdiv);
-
-        } else if (data.leave) { // Handle leaving
-
-            console.log("Leaving room " + data.leave);
-            $("#room-" + data.leave).remove();
+            showMessage("Leaving game " + data.leave)
             map = []
 
-        } else if (data.message || data.msg_type != 'message') {  // Handle getting a message
-
-            var msgdiv = $("#room-" + data.room + " .messages");
-            var ok_msg = "";
+        } else if (data.message || data.msg_type != 'message') {
 
             switch (data.msg_type) {
 
                 case 'message':
-
-                    if (data.username == username) {
-                        if (collision(data.message.new_x, data.message.new_y)){
-                            return;
-                        }
-                        player_x = data.message.new_x;
-                        player_y = data.message.new_y;
-                        new_draw_start_x = draw_center_x - ( (player_x) * cell_width/2 ) + ( (player_y) * cell_width/2 );
-                        new_draw_start_y = draw_center_y - ( (player_y) * cell_height/2 ) - ( (player_x) * cell_height/2 );
+                    if (data.message.resp_type == 'message') {
+                        showMessage("<span class='msg-user'>" + data.username + ": </span>" +
+                                    "<span class='msg-body'>" + data.message.text + "</span>")
                     }
                     else {
-                        monsters[data.username] = {'x': data.message.new_x, 'y': data.message.new_y};
+                        if (data.username == username) {
+                            if (collision(data.message.new_x, data.message.new_y)){
+                                return;
+                            }
+                            player_x = data.message.new_x;
+                            player_y = data.message.new_y;
+                            new_draw_start_x = draw_center_x - ( (player_x) * cell_width/2 ) + ( (player_y) * cell_width/2 );
+                            new_draw_start_y = draw_center_y - ( (player_y) * cell_height/2 ) - ( (player_x) * cell_height/2 );
+                        }
+                        else {
+                            monsters[data.username] = {'x': data.message.new_x, 'y': data.message.new_y};
+                        }
                     }
-
-                    // ok_msg = "<div class='message'>" +
-                    //         "<span class='username'>" + data.username + "</span>" +
-                    //         "<span class='body'>" + data.message + "</span>" +
-                    //         "</div>";
-                    break;
+                    break
 
                 case 'warning':
-
-                    ok_msg = "<div class='contextual-message text-warning'>" + data.message +
-                            "</div>";
+                    showMessage(data.message)
                     break;
 
                 case 'alert':
-
-                    ok_msg = "<div class='contextual-message text-danger'>" + data.message +
-                            "</div>";
+                    showMessage(data.message)
                     break;
 
                 case 'muted':
-
-                    ok_msg = "<div class='contextual-message text-muted'>" + data.message +
-                            "</div>";
+                    showMessage(data.message)
                     break;
 
-                case 'join':
-
+                case 'enter':
                     monsters[data.username] = {'x': data.x, 'y': data.y };
-                    console.log('>>> pushed to monsters', data.username);
-                    ok_msg = "<div class='contextual-message text-muted'>" + data.username +
-                            " joined the room!" +
-                            "</div>";
+                    showMessage(data.username + " joined the room")
                     break;
 
                 case 'leave':
-
                     delete monsters[data.username]
-                    ok_msg = "<div class='contextual-message text-muted'>" + data.username +
-                            " left the room!" +
-                            "</div>";
+                    showMessage(data.username + " left the room")
                     break;
 
                 default:
-
-                    console.log("Unsupported message type!");
+                    showMessage("Unsupported message type")
                     return;
 
             }
 
-            msgdiv.append(ok_msg);
-            msgdiv.scrollTop(msgdiv.prop("scrollHeight"));
-
         } else {
 
-            console.log("Cannot handle message!");
+            showMessage("Cannot handle message")
 
         }
     };
 
+    // Hook up hotkey
+    cnvs.addEventListener("keydown", function(event) {
+        let key = event.keyCode;
+        let new_x;
+        let new_y;
+        // showMessage(key)
+        switch (key) {
+            case 87:  // up
+                new_x = player_x-1;
+                new_y = player_y-1;
+                break;
+            case 81:  // up left
+                new_x = player_x-1;
+                new_y = player_y;
+                break;
+            case 69:  // up right
+                new_x = player_x;
+                new_y = player_y-1;
+                break;
+            case 88:  // down
+                new_x = player_x+1;
+                new_y = player_y+1;
+                break;
+            case 90:  // down left
+                new_x = player_x;
+                new_y = player_y+1;
+                break;
+            case 67:  // down right
+                new_x = player_x+1;
+                new_y = player_y;
+                break;
+            case 68:  // right
+                new_x = player_x+1;
+                new_y = player_y-1;
+                break;
+            case 65:  // left
+                new_x = player_x-1;
+                new_y = player_y+1;
+                break;
+            default:
+                return;
+        }
 
-    inRoom = function (roomId) { // Says if we joined a room or not by if there's a div for it
-        return $("#room-" + roomId).length > 0;
-    };
-
-    // Room join/leave
-    $("li.room-link").click(function () {
-        roomId = $(this).attr("data-room-id");
-        if (inRoom(roomId)) {
-            // Leave room
-            $(this).removeClass("joined");
+        if (new_x && new_y) {
             socket.send(JSON.stringify({
-                "command": "leave",
-                "room": roomId
-            }));
-        } else {
-            // Join room
-            $(this).addClass("joined");
-            socket.send(JSON.stringify({
-                "command": "join",
-                "room": roomId
+                "command": "send",
+                "room": stage.dataset.gameId,
+                "message": {
+                    'username': username,
+                    'old_x': player_x,
+                    'old_y': player_y,
+                    'new_x': new_x,
+                    'new_y': new_y
+                }
             }));
         }
+    })
+
+    stage.addEventListener('click', function(evnt) {
+    //     if (tileX > player_x || tileY < player_y) {
+    //         player_dir = 'r'
+    //     }
+    //     else {
+    //         player_dir = 'l'
+    //     }
+    //     // socket.send(JSON.stringify({
+    //     //     "command": "send",
+    //     //     "room": data.join,
+    //     //     "message": {
+    //     //         'username': data.message.username,
+    //     //         'old_x': player_x,
+    //     //         'old_y': player_y,
+    //     //         'new_x': tileX,
+    //     //         'new_y': tileY
+    //     //     }
+    //     // }));
+    }, false);
+
+    // Hook up send button to send a message
+    $("#chat-form").on("submit", function (event) {
+        event.preventDefault()
+        socket.send(JSON.stringify({
+            "command": "send",
+            "room": stage.dataset.gameId,
+            "message": $("#chat-form").find("input").val()
+        }));
+        $("#chat-form").find("input").val("");
+        return false;
     });
 
-    socket.onopen = function () {
-        console.log("Connected to chat socket");
-    };
-    socket.onclose = function () {
-        console.log("Disconnected from chat socket");
-    }
+    $('#button-quit').on('click', function(event) { // Leave room
+        event.preventDefault()
+        socket.send(JSON.stringify({
+            "command": "leave",
+            "room": stage.dataset.gameId
+        }));
+        window.location = $(event.target).data('url')
+    })
 
-}
+})
+
