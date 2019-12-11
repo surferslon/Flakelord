@@ -1,133 +1,126 @@
-document.addEventListener('DOMContentLoaded', function() {
-    // {window.onload = function() {
-    // 800 1295
-    var stage       = document.getElementById('cnvs')
-    var ctx         = stage.getContext('2d')
-    var ctx_titles  = stage.getContext('2d')
-    var ctx_text    = stage.getContext('2d')
+var username = ''
+var monsters = {}
 
-    var username = ''
-    var map = []
-    var monsters = {}
+var player_x;
+var player_y;
+var player_dir = 'r';
 
-    var mouse_x = 0;
-    var mouse_y = 0;
+var img_player_l = new Image();
+var img_player_r = new Image();
+var img_wall = new Image();
+var img_floor = new Image();
+var img_stairway = new Image();
 
-    var cell_width = 132;
-    var cell_height = 69;
-    var screen_steps = 12;
+var character = 'rogue';
 
-    var screen_step_x = cell_width / screen_steps;
-    var screen_step_y = cell_height / screen_steps
+img_player_l.src = '/static/img/chars/'.concat(character, '/left.png');
+img_player_r.src = '/static/img/chars/'.concat(character, '/right.png');
+img_wall.src   = '/static/img/landscape/wall0.png';
+img_floor.src  = '/static/img/landscape/floor.png';
+img_stairway.src = '/static/img/landscape/stairway.png';
 
-    var player_x;
-    var player_y;
-    var player_dir = 'r';
+var monster_x = 18;
+var monster_y = 15;
+var monster_dir = 'r';
 
-    var draw_center_x = stage.offsetWidth / 2;
-    var draw_center_y = stage.offsetHeight / 2;
+var img_monster_l = new Image();
+var img_monster_r = new Image();
+img_monster_r.src = '/static/img/chars/dwarf/left.png'
+img_monster_r.src = '/static/img/chars/dwarf/left.png'
 
-    var draw_start_x;
-    var draw_start_y;
+var tileX
+var tileY
 
-    var new_draw_start_x;
-    var new_draw_start_y;
 
-    var y = draw_start_y + 5*cell_height,
-        x = (draw_start_x - 8*cell_width) + 5*cell_width, // Start positions
-        wid = 20,
-        hei = 30;
-
-    var img_player_l = new Image();
-    var img_player_r = new Image();
-    var img_wall = new Image();
-    var img_floor = new Image();
-    var img_stairway = new Image();
-
-    var character = 'rogue';
-
-    img_player_l.src = '/static/img/chars/'.concat(character, '/left.png');
-    img_player_r.src = '/static/img/chars/'.concat(character, '/right.png');
-    img_wall.src   = '/static/img/landscape/wall0.png';
-    img_floor.src  = '/static/img/landscape/floor.png';
-    img_stairway.src = '/static/img/landscape/stairway.png';
-
-    var monster_x = 18;
-    var monster_y = 15;
-    var monster_dir = 'r';
-
-    var img_monster_l = new Image();
-    var img_monster_r = new Image();
-    img_monster_r.src = '/static/img/chars/dwarf/left.png'
-    img_monster_r.src = '/static/img/chars/dwarf/left.png'
-
-    var tileX
-    var tileY
-    stage.width  = stage.offsetWidth;
-    stage.height = stage.offsetHeight;
-    var terminal = $("#terminal")
-
-    function showMessage(message) {
-        let div_msg = "<div class='terminal-message'>" + message + "</div"
-        terminal.append(div_msg)
-        terminal.scrollTop(terminal.prop("scrollHeight"));
+class Stage {
+    constructor() {
+        this.terminal = $("#terminal")
+        this.canvas = document.getElementById('cnvs')
+        this.gameId = this.canvas.dataset.gameId
+        this.ctx = this.canvas.getContext('2d')
+        this.draw_center_x = this.canvas.offsetWidth / 2;
+        this.draw_center_y = this.canvas.offsetHeight / 2;
+        this.new_draw_start_x = this.draw_center_x;
+        this.new_draw_start_y = this.draw_center_y;
+        this.canvas.width  = this.canvas.offsetWidth;
+        this.canvas.height = this.canvas.offsetHeight;
+        this.mouse_x = 0;
+        this.mouse_y = 0;
+        this.cell_width = 132;
+        this.screen_steps = 12;
+        this.cell_height = 69;
+        this.screen_step_x = this.cell_width / this.screen_steps;
+        this.screen_step_y = this.cell_height / this.screen_steps
+        this.y = this.draw_start_y + 5*this.cell_height,
+        this.x = (this.draw_start_x - 8*this.cell_width) + 5*this.cell_width, // Start positions
+        this.wid = 20,
+        this.hei = 30;
+        this.map = [];
     }
 
-    function ConvertToCoord(x, y) {
+    ConvertToCoord(x, y) {
         return {
-            x: draw_start_x + ((x - y) * cell_width/2),
-            y: draw_start_y + (y + x) * cell_height/2
+            x: this.draw_start_x + ((x - y) * this.cell_width/2),
+            y: this.draw_start_y + (y + x) * this.cell_height/2
         }
     }
 
-    function drawPlayer(x, y, wid, hei, player_dir) {
-        coords = ConvertToCoord(x, y)
-        drawRhomb(coords.x, coords.y);
+    showMessage(message) {
+        let div_msg = "<div class='terminal-message'>" + message + "</div"
+        this.terminal.append(div_msg)
+        this.terminal.scrollTop(this.terminal.prop("scrollHeight"));
+    }
+
+    drawRhomb(x, y) {
+        this.ctx.beginPath();
+        this.ctx.moveTo(x, y);
+        this.ctx.lineTo(x + this.cell_width / 2, y + this.cell_height / 2);
+        this.ctx.lineTo(x, y + this.cell_height);
+        this.ctx.lineTo(x - this.cell_width / 2, y + this.cell_height / 2);
+        this.ctx.lineTo(x, y);
+        this.ctx.strokeStyle = "rgba(0, 0, 255, 0.5)";
+        this.ctx.strokeStyle = 'white';
+        this.ctx.stroke();
+        this.ctx.closePath();
+    }
+
+    drawWall(x, y) {
+        this.ctx.drawImage(img_wall, x-this.cell_width/2, y-this.cell_height-35);
+    }
+
+    drawFloor(x, y) {
+        this.ctx.drawImage(img_floor, x-this.cell_width/2, y);
+    }
+
+    drawStairway(x, y) {
+        this.ctx.drawImage(img_stairway, x-this.cell_width/2, y);
+    }
+
+    drawPlayer(x, y, wid, hei, player_dir) {
+        let coords = this.ConvertToCoord(x, y)
+        this.drawRhomb(coords.x, coords.y);
         if (player_dir=='r' ){
-            ctx.drawImage(img_player_r, coords.x-cell_width/4, coords.y-cell_height+30);
+            this.ctx.drawImage(img_player_r, coords.x-this.cell_width/4, coords.y-this.cell_height+30);
         }
         else {
-            ctx.drawImage(img_player_l, coords.x-cell_width/4, coords.y-cell_height+30);
+            this.ctx.drawImage(img_player_l, coords.x-this.cell_width/4, coords.y-this.cell_height+30);
         }
     }
 
-    function drawMonster(x, y, wid, hei) {
-        coords = ConvertToCoord(x, y)
+    drawMonster(x, y, wid, hei) {
+        let coords = this.ConvertToCoord(x, y)
         if (monster_dir=='r'){
-            ctx.drawImage(img_monster_r, coords.x-cell_width/4, coords.y-cell_height+3);
+            this.ctx.drawImage(img_monster_r, coords.x-this.cell_width/4, coords.y-this.cell_height+3);
         }
         else {
-            ctx.drawImage(img_monster_l, coords.x-cell_width/4, coords.y-cell_height+3);
+            this.ctx.drawImage(img_monster_l, coords.x-this.cell_width/4, coords.y-this.cell_height+3);
         }
     }
 
-    function drawRhomb(x, y) {
-        ctx.beginPath();
-        ctx.moveTo(x, y);
-        ctx.lineTo(x + cell_width / 2, y + cell_height / 2);
-        ctx.lineTo(x, y + cell_height);
-        ctx.lineTo(x - cell_width / 2, y + cell_height / 2);
-        ctx.lineTo(x, y);
-        ctx.strokeStyle = "rgba(0, 0, 255, 0.5)";
-        ctx.strokeStyle = 'white';
-        ctx.stroke();
-        ctx.closePath();
-    }
-
-    function drawWall(x, y) {
-        ctx.drawImage(img_wall, x-cell_width/2, y-cell_height-35);
-    }
-    function drawFloor(x, y) {
-        ctx.drawImage(img_floor, x-cell_width/2, y);
-    }
-    function drawStairway(x, y) {
-        ctx.drawImage(img_stairway, x-cell_width/2, y);
-    }
-
-    function drawArea(coord) {
+    drawArea(coord) {
         let area_y = 500;
         let area_x = 700;
-        if (coord.x < draw_center_x-area_x || coord.y < draw_center_y-area_y || coord.x > draw_center_x + area_x || coord.y > draw_center_y + area_y) {
+        if (coord.x < this.draw_center_x-area_x || coord.y < this.draw_center_y-area_y || coord.x > this.draw_center_x + area_x || coord.y > this.draw_center_y + area_y) {
             return false;
         }
         else {
@@ -135,21 +128,20 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    function drawMap_background() {
-
+    drawMap_background() {
         // Floor
         for(var cur_clm=0; cur_clm<60; cur_clm++) {
             for(var cur_row=0; cur_row<30; cur_row++) {
-                coord = ConvertToCoord(cur_clm, cur_row);
-                if ( !drawArea(coord) ) {
+                let coord = this.ConvertToCoord(cur_clm, cur_row);
+                if ( !this.drawArea(coord) ) {
                     continue;
                 }
-                switch (map[cur_row][cur_clm]['obj']) {
+                switch (this.map[cur_row][cur_clm]['obj']) {
                     case 'floor':
-                        drawFloor(coord.x, coord.y);
+                        this.drawFloor(coord.x, coord.y);
                         break;
                     case 'stairway':
-                        drawStairway(coord.x, coord.y);
+                        this.drawStairway(coord.x, coord.y);
                         break;
                 }
             }
@@ -158,13 +150,13 @@ document.addEventListener('DOMContentLoaded', function() {
         // Background walls
         for(var cur_clm=0; cur_clm<60; cur_clm++) {
             for(var cur_row=0; cur_row<30; cur_row++) {
-                if (map[cur_row][cur_clm]['obj'] == undefined) {
+                if (this.map[cur_row][cur_clm]['obj'] == undefined) {
                     // console.log(cur_row, cur_clm);
                 }
 
-                if (map[cur_row][cur_clm]['obj'] == 'wall') {
-                    coord = ConvertToCoord(cur_clm, cur_row);
-                    if ( !drawArea(coord) ) {
+                if (this.map[cur_row][cur_clm]['obj'] == 'wall') {
+                    let coord = this.ConvertToCoord(cur_clm, cur_row);
+                    if ( !this.drawArea(coord) ) {
                         continue;
                     }
 
@@ -172,132 +164,49 @@ document.addEventListener('DOMContentLoaded', function() {
                     let diff_x = cur_clm - player_x;
                     let diff_y = cur_row - player_y;
                     if (cur_clm >= player_x && cur_row >= player_y && diff_y < 2 && diff_x<2) {
-                        ctx.globalAlpha = 0.1;
+                        this.ctx.globalAlpha = 0.1;
                     }
                     else if (cur_clm >= player_x && cur_row >= player_y && diff_y < 4 && diff_x<4) {
-                        ctx.globalAlpha = 0.3;
+                        this.ctx.globalAlpha = 0.3;
                     }
                     else if (cur_clm >= player_x && cur_row >= player_y && diff_y < 6 && diff_x<6) {
-                        ctx.globalAlpha = 0.6;
+                        this.ctx.globalAlpha = 0.6;
                     }
                     else if (cur_clm >= player_x && cur_row >= player_y && diff_y < 7 && diff_x<7) {
-                        ctx.globalAlpha = 0.8;
+                        this.ctx.globalAlpha = 0.8;
                     }
-                    drawWall(coord.x, coord.y);
-                    ctx.globalAlpha = 1;
+                    this.drawWall(coord.x, coord.y);
+                    this.ctx.globalAlpha = 1;
                 }
 
                 if (cur_row==player_y && cur_clm==player_x) {
-                    drawPlayer(player_x, player_y, wid, hei, player_dir);
+                    this.drawPlayer(player_x, player_y, this.wid, this.hei, player_dir);
                 }
 
 
                 for(var key in monsters) {
                     if (monsters[key].x==cur_clm && monsters[key].y==cur_row) {
-                        drawPlayer(monsters[key].x, monsters[key].y, wid, hei, null);
+                        this.drawPlayer(monsters[key].x, monsters[key].y, this.wid, this.hei, null);
                     }
                 }
 
                 if (cur_row==monster_y && cur_clm==monster_x) {
-                    drawMonster(monster_x, monster_y, wid, hei);
+                    this.drawMonster(monster_x, monster_y, this.wid, this.hei);
                 }
 
             }
         }
-
     }
 
-
-    function drawMap() {
-        drawMap_background();
+    drawMap() {
+        this.drawMap_background();
     }
 
-    function collision(x, y) {
-        if (map[y][x]['obj'] == 'wall' ) {
-            return true
-        }
-        return false
+    drawPointer() {
+        tileX = Math.round((this.mouse_x - this.draw_start_x ) / this.cell_width + (this.mouse_y-this.draw_start_y) / this.cell_height);
+        tileY = Math.round((this.mouse_y - this.draw_start_y) / this.cell_height - (this.mouse_x-this.draw_start_x) / this.cell_width);
 
-    }
-
-    document.onkeydown = function(event) {
-        var key = event.keyCode;
-        // console.log(key);
-
-    //     if(key === 68 && player_x<=1200 && !collision(player_x+1, player_y-1)) {
-    //         player_x = player_x+1;
-    //         player_y = player_y-1;
-    //         player_dir = 'r';
-    //          // draw_start_x = draw_start_x-cell_width;
-
-    // //         new_draw_start_x = new_draw_start_x-cell_width;
-
-    //      } // right
-    //     else if(key === 69 && x>0 && !collision(player_x, player_y-1)) {
-    //         player_y = player_y-1;
-    //         player_dir = 'r';
-    //         new_draw_start_x = new_draw_start_x-cell_width/2;
-    //         new_draw_start_y = new_draw_start_y+cell_height/2;
-    //     } // right up
-    //     else if(key === 67 && x>0 && !collision(player_x+1, player_y)) {
-    //         player_x = player_x+1;
-    //         player_dir = 'r';
-    //         new_draw_start_x = new_draw_start_x-cell_width/2;
-    //         new_draw_start_y = new_draw_start_y-cell_height/2;
-    //     } // rigth down
-    //     else if(key === 65 && x>0 && !collision(player_x-1, player_y+1)) {
-    //         player_x = player_x-1;
-    //         player_y = player_y+1;
-    //         player_dir = 'l';
-    //         new_draw_start_x = new_draw_start_x+cell_width;
-    //     } // left
-    //     else if(key === 81 && player_x>0 && !collision(player_x-1, player_y)) {
-    //         player_x = player_x-1;
-    //         player_dir = 'l';
-    //         new_draw_start_x = new_draw_start_x+cell_width/2;
-    //         new_draw_start_y = new_draw_start_y+cell_height/2;
-    //     } // left up
-    //     else if(key === 87 && y>0 && !collision(player_x-1, player_y-1)) {
-    //         player_x = player_x-1;
-    //         player_y = player_y-1;
-    //         new_draw_start_y = new_draw_start_y+cell_height;
-    //     } // up
-    //     else if(key === 88 && y<=600 && !collision(player_x+1, player_y+1)) {
-    //         player_x = player_x+1;
-    //         player_y = player_y+1;
-    //         new_draw_start_y = new_draw_start_y-cell_height;
-    //     } // down
-    //     else if(key === 90 && player_x>0 && !collision(player_x, player_y+1)) {
-    //         player_y = player_y+1;
-    //         player_dir = 'l';
-    //         new_draw_start_x = new_draw_start_x+cell_width/2;
-    //         new_draw_start_y = new_draw_start_y-cell_height/2;
-    //     } // left down
-
-
-    //     if (monster_x > player_x)       {
-    //         monster_x = monster_x - 1   }
-    //     else if (monster_x < player_x)    {
-    //         monster_x = monster_x + 1   }
-    //     if (monster_y > player_y)       {
-    //         monster_y = monster_y - 1;  }
-    //     else if (monster_y < player_y)  {
-    //         monster_y = monster_y + 1;  }
-
-    }
-
-
-    stage.addEventListener('mousemove', function(evnt) {
-        var rect = stage.getBoundingClientRect();
-        mouse_x = evnt.clientX - rect.left;
-        mouse_y = evnt.clientY - rect.top;
-    }, false);
-
-    function drawPointer() {
-        tileX = Math.round((mouse_x - draw_start_x ) / cell_width + (mouse_y-draw_start_y) / cell_height);
-        tileY = Math.round((mouse_y - draw_start_y) / cell_height - (mouse_x-draw_start_x) / cell_width);
-
-        coord = ConvertToCoord(tileX, tileY);
+        let coord = this.ConvertToCoord(tileX, tileY);
 
         if (tileX > player_x || tileY < player_y) {
             player_dir = 'r'
@@ -306,98 +215,117 @@ document.addEventListener('DOMContentLoaded', function() {
             player_dir = 'l'
         }
 
-        drawRhomb(coord.x, coord.y);
-
-        ctx.font = "15px Courier";
-        ctx.fillStyle = 'white';
+        this.drawRhomb(coord.x, coord.y);
+        this.ctx.font = "15px Courier";
+        this.ctx.fillStyle = 'white';
 
         if (tileY < 30 && tileY >= 0 && tileX <= 60 && tileX >= 0) {
-            if (map[tileY][tileX]) {
-                ctx.fillText(map[tileY][tileX]['obj'], coord.x+20, coord.y);
+            if (this.map[tileY][tileX]) {
+                this.ctx.fillText(this.map[tileY][tileX]['obj'], coord.x+20, coord.y);
             }
         }
         else if (tileY == player_y && tileX == player_x) {
-            ctx.fillText("Player", coord.x+20, coord.y);
+            this.ctx.fillText("Player", coord.x+20, coord.y);
         }
-
     }
 
-    var FPS = 20;
+    collision(x, y) {
+        if (this.map[y][x]['obj'] == 'wall' ) {
+            return true
+        }
+        return false
+    }
+
+}
+
+class Creature {
+    constructor(name, x, y, health) {
+        this.name = name;
+        this.x = x;
+        this.y = y;
+        this.dir = 'r'
+        health = 100;
+    }
+}
+
+
+document.addEventListener('DOMContentLoaded', function() {
+
+    var stage = new Stage()
+
+    // MAIN LOOP //
+
+    // var FPS = 20;
 
     function mainLoop() {
-        if (new_draw_start_x < draw_start_x) {
-            draw_start_x = draw_start_x - screen_step_x;
+        if (stage.new_draw_start_x < stage.draw_start_x) {
+            stage.draw_start_x = stage.draw_start_x - stage.screen_step_x;
         }
-        else if (new_draw_start_x > draw_start_x) {
-            draw_start_x = draw_start_x + screen_step_x;
+        else if (stage.new_draw_start_x > stage.draw_start_x) {
+            stage.draw_start_x = stage.draw_start_x + stage.screen_step_x;
         }
-        if (new_draw_start_y < draw_start_y) {
-            draw_start_y = draw_start_y - screen_step_y;
+        if (stage.new_draw_start_y < stage.draw_start_y) {
+            stage.draw_start_y = stage.draw_start_y - stage.screen_step_y;
         }
-        if (new_draw_start_y > draw_start_y) {
-            draw_start_y = draw_start_y + screen_step_y;
+        if (stage.new_draw_start_y > stage.draw_start_y) {
+            stage.draw_start_y = stage.draw_start_y + stage.screen_step_y;
         }
-        ctx.clearRect(0, 0, 1800, 900); // clearing anything drawn on canvas
-        ctx.fillStyle = "black";
-        ctx.fillRect(0, 0, stage.width, stage.height);
-        if (map.length) {
-            drawMap();
-            drawPointer();
+        stage.ctx.clearRect(0, 0, 1800, 900); // clearing anything drawn on canvas
+        stage.ctx.fillStyle = "black";
+        stage.ctx.fillRect(0, 0, stage.canvas.width, stage.canvas.height);
+        if (stage.map.length) {
+            stage.drawMap();
+            stage.drawPointer();
         }
         requestAnimationFrame(mainLoop);
     }
-
     requestAnimationFrame(mainLoop);
-
 
     // WEB SOCKETS //
 
     // Correctly decide between ws:// and wss://
     var ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
-    var ws_path = ws_scheme + '://' + window.location.host + "/chat/stream/";
-
-    showMessage("Connecting to " + ws_path)
-
+    var ws_path = ws_scheme + '://' + window.location.host + "/stream/";
+    stage.showMessage("Connecting to " + ws_path)
     var socket = new ReconnectingWebSocket(ws_path);
 
     socket.onopen = function () {
         socket.send(JSON.stringify({
             "command": "join",
-            "room": stage.dataset.gameId
+            "room": stage.canvas.dataset.gameId
         }));
-        showMessage("Connected")
+        stage.showMessage("Connected")
     }
     socket.onclose = function () {
-        showMessage("Disconnected")
+        stage.showMessage("Disconnected")
     }
     socket.onmessage = function (message) {  // Handle incoming messages
 
         var data = JSON.parse(message.data);
 
         if (data.error) {
-            showMessage("data.error")
+            stage.showMessage("data.error")
             return;
         }
 
         if (data.join) {
 
-            showMessage("Joining room " + data.join)
+            stage.showMessage("Joining room " + data.join)
 
-            map = data.message.field;
+            stage.map = data.message.field;
             username = data.message.username;
-            showMessage("Saved local var username " + data.message.username)
             player_x = data.message.start_x;
             player_y = data.message.start_y;
 
-            draw_start_x = draw_center_x - ( (player_x) * cell_width/2 ) + ( (player_y) * cell_width/2 );
-            draw_start_y = draw_center_y - ( (player_y) * cell_height/2 ) - ( (player_x) * cell_height/2 );
-            new_draw_start_x = draw_start_x;
-            new_draw_start_y = draw_start_y;
+            stage.draw_start_x = stage.draw_center_x - ( (player_x) * stage.cell_width/2 ) + ( (player_y) * stage.cell_width/2 );
+            stage.draw_start_y = stage.draw_center_y - ( (player_y) * stage.cell_height/2 ) - ( (player_x) * stage.cell_height/2 );
+            stage.new_draw_start_x = stage.draw_start_x;
+            stage.new_draw_start_y = stage.draw_start_y;
 
         } else if (data.leave) {
 
-            showMessage("Leaving game " + data.leave)
-            map = []
+            stage.showMessage("Leaving game " + data.leave)
+            stage.map = []
 
         } else if (data.message || data.msg_type != 'message') {
 
@@ -405,18 +333,18 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 case 'message':
                     if (data.message.resp_type == 'message') {
-                        showMessage("<span class='msg-user'>" + data.username + ": </span>" +
+                        stage.showMessage("<span class='msg-user'>" + data.username + ": </span>" +
                                     "<span class='msg-body'>" + data.message.text + "</span>")
                     }
                     else {
                         if (data.username == username) {
-                            if (collision(data.message.new_x, data.message.new_y)){
+                            if (stage.collision(data.message.new_x, data.message.new_y)){
                                 return;
                             }
                             player_x = data.message.new_x;
                             player_y = data.message.new_y;
-                            new_draw_start_x = draw_center_x - ( (player_x) * cell_width/2 ) + ( (player_y) * cell_width/2 );
-                            new_draw_start_y = draw_center_y - ( (player_y) * cell_height/2 ) - ( (player_x) * cell_height/2 );
+                            stage.new_draw_start_x = stage.draw_center_x - ( (player_x) * stage.cell_width/2 )  + ( (player_y) * stage.cell_width/2 );
+                            stage.new_draw_start_y = stage.draw_center_y - ( (player_y) * stage.cell_height/2 ) - ( (player_x) * stage.cell_height/2 );
                         }
                         else {
                             monsters[data.username] = {'x': data.message.new_x, 'y': data.message.new_y};
@@ -425,42 +353,89 @@ document.addEventListener('DOMContentLoaded', function() {
                     break
 
                 case 'warning':
-                    showMessage(data.message)
+                    stage.showMessage(data.message)
                     break;
 
                 case 'alert':
-                    showMessage(data.message)
+                    stage.showMessage(data.message)
                     break;
 
                 case 'muted':
-                    showMessage(data.message)
+                    stage.showMessage(data.message)
                     break;
 
                 case 'enter':
                     monsters[data.username] = {'x': data.x, 'y': data.y };
-                    showMessage(data.username + " joined the room")
+                    stage.showMessage(data.username + " joined the room")
                     break;
 
                 case 'leave':
                     delete monsters[data.username]
-                    showMessage(data.username + " left the room")
+                    stage.showMessage(data.username + " left the room")
                     break;
 
                 default:
-                    showMessage("Unsupported message type")
+                    stage.showMessage("Unsupported message type")
                     return;
 
             }
 
         } else {
 
-            showMessage("Cannot handle message")
+            stage.showMessage("Cannot handle message")
 
         }
     };
 
-    // Hook up hotkey
-    cnvs.addEventListener("keydown", function(event) {
+    // EVENTS //
+
+    stage.canvas.addEventListener('click', function(evnt) {
+    //     if (tileX > player_x || tileY < player_y) {
+    //         player_dir = 'r'
+    //     }
+    //     else {
+    //         player_dir = 'l'
+    //     }
+    //     // socket.send(JSON.stringify({
+    //     //     "command": "send",
+    //     //     "room": data.join,
+    //     //     "message": {
+    //     //         'username': data.message.username,
+    //     //         'old_x': player_x,
+    //     //         'old_y': player_y,
+    //     //         'new_x': tileX,
+    //     //         'new_y': tileY
+    //     //     }
+    //     // }));
+    }, false);
+
+    $("#chat-form").on("submit", function (event) {  // send a message
+        event.preventDefault()
+        socket.send(JSON.stringify({
+            "command": "send",
+            "room": stage.canvas.dataset.gameId,
+            "message": $("#chat-form").find("input").val()
+        }));
+        $("#chat-form").find("input").val("");
+        return false;
+    });
+
+    $('#button-quit').on('click', function(event) { // Leave room
+        event.preventDefault()
+        socket.send(JSON.stringify({
+            "command": "leave",
+            "room": stage.canvas.dataset.gameId
+        }));
+        window.location = $(event.target).data('url')
+    });
+
+    stage.canvas.addEventListener('mousemove', function(evnt) {
+        var rect = stage.canvas.getBoundingClientRect();
+        stage.mouse_x = evnt.clientX - rect.left;
+        stage.mouse_y = evnt.clientY - rect.top;
+    }, false);
+
+    stage.canvas.addEventListener("keydown", function(event) {
         let key = event.keyCode;
         let new_x;
         let new_y;
@@ -505,7 +480,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (new_x && new_y) {
             socket.send(JSON.stringify({
                 "command": "send",
-                "room": stage.dataset.gameId,
+                "room": stage.gameId,
                 "message": {
                     'username': username,
                     'old_x': player_x,
@@ -515,47 +490,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             }));
         }
-    })
-
-    stage.addEventListener('click', function(evnt) {
-    //     if (tileX > player_x || tileY < player_y) {
-    //         player_dir = 'r'
-    //     }
-    //     else {
-    //         player_dir = 'l'
-    //     }
-    //     // socket.send(JSON.stringify({
-    //     //     "command": "send",
-    //     //     "room": data.join,
-    //     //     "message": {
-    //     //         'username': data.message.username,
-    //     //         'old_x': player_x,
-    //     //         'old_y': player_y,
-    //     //         'new_x': tileX,
-    //     //         'new_y': tileY
-    //     //     }
-    //     // }));
-    }, false);
-
-    // Hook up send button to send a message
-    $("#chat-form").on("submit", function (event) {
-        event.preventDefault()
-        socket.send(JSON.stringify({
-            "command": "send",
-            "room": stage.dataset.gameId,
-            "message": $("#chat-form").find("input").val()
-        }));
-        $("#chat-form").find("input").val("");
-        return false;
-    });
-
-    $('#button-quit').on('click', function(event) { // Leave room
-        event.preventDefault()
-        socket.send(JSON.stringify({
-            "command": "leave",
-            "room": stage.dataset.gameId
-        }));
-        window.location = $(event.target).data('url')
     })
 
 })

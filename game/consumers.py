@@ -8,7 +8,7 @@ from game.models import Level
 from game.game import move
 
 
-class ChatConsumer(AsyncJsonWebsocketConsumer):
+class GameConsumer(AsyncJsonWebsocketConsumer):
 
     async def connect(self):
         """ Called when the websocket is handshaking as part of initial connection. """
