@@ -235,6 +235,13 @@ document.addEventListener('DOMContentLoaded', function() {
             stage.drawMap();
             stage.drawPointer();
         }
+        if (parseInt($("#span-health").text()) <= 0){
+                socket.send(JSON.stringify({
+                "command": "leave",
+                "room": stage.canvas.dataset.gameId
+            }));
+            window.location = $('#button-quit').data('url')
+        }
         requestAnimationFrame(mainLoop);
     }
     requestAnimationFrame(mainLoop);
@@ -285,6 +292,15 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
             }
 
+           $('#span-health').html(data.message.health);
+           if (data.message.damage_bonus) {
+               $('#span-weapon').html(data.message.damage_mult + 'd' + data.message.damage_max + ' + ' + data.message.damage_bonus);
+           }
+           else {
+               $('#span-weapon').html(data.message.damage_mult + 'd' + data.message.damage_max);
+           }
+           $('#span-dvpv').html(data.message.DV + ' / ' + data.message.PV);
+
         } else if (data.leave) {
 
             stage.showMessage("Leaving game " + data.leave)
@@ -309,6 +325,13 @@ document.addEventListener('DOMContentLoaded', function() {
                         else {
                             mob_list[data.username].x = data.message.new_x;
                             mob_list[data.username].y = data.message.new_y;
+                        }
+                        if (data.message.text) {
+                            stage.showMessage(data.message.text)
+                        }
+
+                        if (data.message[player.name]) {
+                           $('#span-health').html(data.message[player.name].new_health);
                         }
                     }
                     break

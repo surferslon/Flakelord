@@ -54,5 +54,4 @@ class Level(models.Model):
 
 
 class User(AbstractUser):
-    game = models.ForeignKey(Room, on_delete=models.CASCADE, null=True)
     char = models.CharField(max_length=255, choices=settings.AVAILABLE_CHARACTERS, default='rogue')

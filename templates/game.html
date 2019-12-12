@@ -14,6 +14,24 @@
     <div id='game-wrapper'>
         <div id="game-table">
             <div id="game-table-menu">
+                <div class="game-menu-item">
+                    <span> {{ request.user }} </span>
+                </div>
+                <div id="menu-username" class="game-menu-item">
+                    <span> Health </span>
+                    <br>
+                    <span id="span-health" class="menu-item-value"> </span>
+                </div>
+                <div id="game-weapon" class="game-menu-item">
+                    <span> Weapon </span>
+                    <br>
+                    <span id="span-weapon" class="menu-item-value"> </span>
+                </div>
+                <div id="DVPV" class="game-menu-item">
+                    <span> DV / PV </span>
+                    <br>
+                    <span id="span-dvpv" class="menu-item-value"> </span>
+                </div>
                 <a href="#" id="button-quit" data-url="{% url 'game:menu' %}">quit</a>
             </div>
             <div>

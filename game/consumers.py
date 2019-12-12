@@ -69,7 +69,20 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
         self.rooms.add(room_id)  # Store that we're in the room
 
         redis_server = get_redis()
-        redis_server.hmset(username, {'x': start_x, 'y': start_y, 'health': 100})
+        redis_server.hmset(
+            username,
+            {
+                'x': start_x,
+                'y': start_y,
+                'health': 100,
+                'accuracy': 1,
+                'damage_mult': '2',
+                'damage_max': '3',
+                'damage_bonus': 1,
+                'DV': 3,
+                'PV': 1,
+            }
+        )
         redis_server.sadd('room_%s' % room_id, username)
 
         await self.channel_layer.group_add(  # Add them to the group so they get room messages
@@ -88,8 +101,16 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
             "join": str(room.id),
             "title": room.title,
             'message': {
-                'start_x': start_x, 'start_y': start_y,
+                'start_x': start_x,
+                'start_y': start_y,
                 'field': field,
+                'health': 100,
+                'accuracy': 1,
+                'damage_mult': '2',
+                'damage_max': '3',
+                'damage_bonus': 1,
+                'DV': 3,
+                'PV': 1,
                 'username': self.scope["user"].username,
                 'mob_list': mob_list
             }
@@ -134,16 +155,15 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
         username = self.scope["user"].username
 
         if isinstance(message, dict):
-            new_x, new_y = move(message)
-            response = {'username': username, 'new_x': new_x, 'new_y': new_y, 'resp_type': 'move'}
+            new_x, new_y, text, new_values = move(message, room_id)
+            response = {'username': username, 'new_x': new_x, 'new_y': new_y, 'resp_type': 'move', 'text': text}
+            # import ipdb; ipdb.set_trace(context=16)
+            if new_values:
+                response.update(new_values)
             msg_type = 'chat.message'
         else:
             response = {'text': message, 'resp_type': 'message'}
             msg_type = 'game.move'
-
-        redis = get_redis()
-        redis.hset(username, 'x', new_x)
-        redis.hset(username, 'y', new_y)
 
         await self.channel_layer.group_send(
             room.group_name,

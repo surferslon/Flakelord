@@ -95,19 +95,23 @@ def generate_field(debug=False):
     return field, startx, starty
 
 
-def move(msg):
-    new_x = msg['old_x']
-    new_y = msg['old_y']
-    if msg['new_x'] > msg['old_x']:
-        new_x += 1
-    elif msg['new_x'] < msg['old_x']:
-        new_x -= 1
-    if msg['new_y'] > msg['old_y']:
-        new_y += 1
-    elif msg['new_y'] < msg['old_y']:
-        new_y -= 1
-
-    return (new_x, new_y)
+def move(msg, room_id):
+    redis = get_redis()
+    room_members = redis.smembers('room_%s' % room_id)
+    for member_name in room_members:
+        member = redis.hgetall(member_name)
+        if int(member['x']) == msg['new_x'] and int(member['y']) == msg['new_y']:
+            new_health = int(member['health']) - 1
+            redis.hset(member_name, 'health', new_health)
+            return (
+                msg['old_x'],
+                msg['old_y'],
+                '%s hits %s' % (msg['username'], member_name),
+                {member_name: {'new_health': new_health}}
+            )
+    redis.hset(msg['username'], 'x', msg['new_x'])
+    redis.hset(msg['username'], 'y', msg['new_y'])
+    return (msg['new_x'], msg['new_y'], None, None)
 
 # class Level:
 #     startx = 0

@@ -1,10 +1,16 @@
+/* STAGE */
+
+@font-face {
+    font-family: "PixelKnight";
+    src: url("PixelKnight.otf");
+}
+
 html, body {
     width:  100%;
     height: 100%;
     margin: 0px;
     background-color: black;
 }
-
 #cnvs {
     height: 800px;
     width:  1295px;
@@ -12,10 +18,8 @@ html, body {
  /*   height: 1000px;
     width:  1900px;*/
     /*border: 1px solid gray;*/
-
     top: 0;
     left: 0;
-
     box-shadow: 0 0 200px rgba(0,0,0,0.9) inset;
 }
 #game-wrapper {
@@ -28,14 +32,37 @@ html, body {
     /*border: 1px solid grey;*/
     grid-template-columns: 300px 1300px;
 }
+
+/* MENU */
+
 #game-table-menu {
     grid-column: 1 / 3;
-    text-align: right;
+    display: grid;
+    grid-template-columns: 20% 20% 20% 20% 20%;
 }
 #game-table-menu a {
     color: grey;
     text-decoration: none;
 }
+.game-menu-item {
+    height: 50px;
+    /*border: 1px solid grey;*/
+    text-align: center;
+    color: #d7c2ac;
+    font-size: 16pt;
+    font-family: "PixelKnight";
+}
+.menu-item-value {
+    color: #adbac4;
+    font-size: 14pt;
+}
+#button-quit {
+    font-family: monospace;
+    text-align: right;
+}
+
+/* TERMINAL */
+
 #terminal {
     padding: 10px;
     /*border-right: 1px solid grey;*/

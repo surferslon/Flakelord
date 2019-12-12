@@ -1,17 +1,20 @@
+@font-face {
+    font-family: "PixelKnight";
+    src: url("PixelKnight.otf");
+}
 html, body {
-  width:  100%;
-  height: 100%;
-  margin: 0px;
-  background-color: #131314;
+    width:  100%;
+    height: 100%;
+    margin: 0px;
+    background-color: #131314;
+    font-family: "PixelKnight";
 
 }
 h2 {
     font-size: 18pt;
-    font-family: monospace;
     color: #dbede3;
 }
 h3 {
-    font-family: monospace;
     color: #dbede3;
     padding-bottom: 40px;
 }
