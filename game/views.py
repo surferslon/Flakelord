@@ -1,15 +1,13 @@
 from django.views.generic import TemplateView, FormView
 from django.views.generic.edit import CreateView
 from django.contrib.auth import login
-from django.contrib.auth.forms import UserCreationForm
-from django.contrib.auth.models import User
 from .models import Room
+from .forms import RegistrationForm
 
 
 class RegistrationView(CreateView):
-    model = User
     template_name = 'registration/signup.html'
-    form_class = UserCreationForm
+    form_class = RegistrationForm
     success_url = '/'
 
     def get_success_url(self, **kwargs):
@@ -26,7 +24,7 @@ class MenuView(TemplateView):
     template_name = 'menu.html'
 
     def get_context_data(self, **kwargs):
-        rooms = Room.objects.order_by("title")
+        rooms = Room.objects.all()
         return {
             'username': self.request.user.username,
             "rooms": rooms,

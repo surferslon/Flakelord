@@ -1,8 +1,11 @@
 from django.contrib import admin
+from django.contrib.auth.admin import UserAdmin
+from .models import Room, User
 
-from .models import Room
 
 
+
+admin.site.register(User, UserAdmin)
 admin.site.register(
     Room,
     list_display=["id", "title", "staff_only"],

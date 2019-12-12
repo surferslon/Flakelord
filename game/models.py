@@ -1,19 +1,8 @@
 from django.db import models
 from django.contrib.postgres.fields import JSONField
-# from django.contrib.auth.models import AbstractUser, PermissionsMixin
+from django.contrib.auth.models import AbstractUser
 from django.conf import settings
-
-from game.game import generate_field
-
-
-# class User(AbstractUser, PermissionsMixin):
-#     username = models.CharField(max_length=12)
-#     email = models.EmailField('email address', unique=True)
-#     character = models.CharField(max_length=255, choices=settings.AVAILABLE_CHARACTERS, default='rogue')
-
-#     class Meta:
-#         verbose_name = 'user'
-#         verbose_name_plural = 'users'
+from .game import generate_field, get_redis
 
 
 class Room(models.Model):
@@ -30,7 +19,6 @@ class Room(models.Model):
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
         field, startx, starty = generate_field()
-        print('generate x', startx)
         new_level = Level(
             number=1,
             field=field,
@@ -47,6 +35,11 @@ class Room(models.Model):
         """
         return "room-%s" % self.id
 
+    @property
+    def members(self):
+        redis = get_redis()
+        return redis.scard('room_%s' % self.id)
+
 
 class Level(models.Model):
     number = models.IntegerField()
@@ -58,3 +51,8 @@ class Level(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class User(AbstractUser):
+    game = models.ForeignKey(Room, on_delete=models.CASCADE, null=True)
+    char = models.CharField(max_length=255, choices=settings.AVAILABLE_CHARACTERS, default='rogue')

@@ -1,6 +1,13 @@
+from django.conf import settings
+import redis
 import random
 import time
 
+
+def get_redis():
+    POOL = redis.ConnectionPool(host=settings.REDIS_HOST, decode_responses=True, port=settings.REDIS_PORT, db=0)
+    return redis.StrictRedis(connection_pool=POOL)
+    # return redis.Redis(host=settings.REDIS_HOST, port=settings.REDIS_PORT, db=0)
 
 def print_field(field):
     str_field = ''
@@ -172,5 +179,6 @@ def move(msg):
 #             new_draw_start_x = new_draw_start_x+cell_width/2;
 #             new_draw_start_y = new_draw_start_y-cell_height/2;
 #         } // left down
+
 
 

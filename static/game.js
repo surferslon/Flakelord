@@ -1,35 +1,10 @@
-var username = ''
-var monsters = {}
-
-var player_x;
-var player_y;
-var player_dir = 'r';
-
-var img_player_l = new Image();
-var img_player_r = new Image();
-var img_wall = new Image();
-var img_floor = new Image();
-var img_stairway = new Image();
-
-var character = 'rogue';
-
-img_player_l.src = '/static/img/chars/'.concat(character, '/left.png');
-img_player_r.src = '/static/img/chars/'.concat(character, '/right.png');
-img_wall.src   = '/static/img/landscape/wall0.png';
-img_floor.src  = '/static/img/landscape/floor.png';
-img_stairway.src = '/static/img/landscape/stairway.png';
-
-var monster_x = 18;
-var monster_y = 15;
-var monster_dir = 'r';
-
-var img_monster_l = new Image();
-var img_monster_r = new Image();
-img_monster_r.src = '/static/img/chars/dwarf/left.png'
-img_monster_r.src = '/static/img/chars/dwarf/left.png'
-
-var tileX
-var tileY
+var player;
+var mob_list = {};
+var imgs = {
+    'wall': new Image(),
+    'floor': new Image(),
+    'stairway': new Image(),
+}
 
 
 class Stage {
@@ -85,35 +60,25 @@ class Stage {
     }
 
     drawWall(x, y) {
-        this.ctx.drawImage(img_wall, x-this.cell_width/2, y-this.cell_height-35);
+        this.ctx.drawImage(imgs.wall, x-this.cell_width/2, y-this.cell_height-35);
     }
 
     drawFloor(x, y) {
-        this.ctx.drawImage(img_floor, x-this.cell_width/2, y);
+        this.ctx.drawImage(imgs.floor, x-this.cell_width/2, y);
     }
 
     drawStairway(x, y) {
-        this.ctx.drawImage(img_stairway, x-this.cell_width/2, y);
+        this.ctx.drawImage(imgs.stairway, x-this.cell_width/2, y);
     }
 
-    drawPlayer(x, y, wid, hei, player_dir) {
-        let coords = this.ConvertToCoord(x, y)
+    drawPlayer(player) {
+        let coords = this.ConvertToCoord(player.x, player.y)
         this.drawRhomb(coords.x, coords.y);
-        if (player_dir=='r' ){
-            this.ctx.drawImage(img_player_r, coords.x-this.cell_width/4, coords.y-this.cell_height+30);
+        if (player.dir=='r' ){
+            this.ctx.drawImage(player.img_r, coords.x-this.cell_width/4, coords.y-this.cell_height+30);
         }
         else {
-            this.ctx.drawImage(img_player_l, coords.x-this.cell_width/4, coords.y-this.cell_height+30);
-        }
-    }
-
-    drawMonster(x, y, wid, hei) {
-        let coords = this.ConvertToCoord(x, y)
-        if (monster_dir=='r'){
-            this.ctx.drawImage(img_monster_r, coords.x-this.cell_width/4, coords.y-this.cell_height+3);
-        }
-        else {
-            this.ctx.drawImage(img_monster_l, coords.x-this.cell_width/4, coords.y-this.cell_height+3);
+            this.ctx.drawImage(player.img_l, coords.x-this.cell_width/4, coords.y-this.cell_height+30);
         }
     }
 
@@ -161,37 +126,31 @@ class Stage {
                     }
 
                     // if ( Math.abs(cur_row - player_y) < 4 && Math.abs(cur_clm - player_x) < 4 ) {
-                    let diff_x = cur_clm - player_x;
-                    let diff_y = cur_row - player_y;
-                    if (cur_clm >= player_x && cur_row >= player_y && diff_y < 2 && diff_x<2) {
+                    let diff_x = cur_clm - player.x;
+                    let diff_y = cur_row - player.y;
+                    if (cur_clm >= player.x && cur_row >= player.y && diff_y < 2 && diff_x<2) {
                         this.ctx.globalAlpha = 0.1;
                     }
-                    else if (cur_clm >= player_x && cur_row >= player_y && diff_y < 4 && diff_x<4) {
+                    else if (cur_clm >= player.x && cur_row >= player.y && diff_y < 4 && diff_x<4) {
                         this.ctx.globalAlpha = 0.3;
                     }
-                    else if (cur_clm >= player_x && cur_row >= player_y && diff_y < 6 && diff_x<6) {
+                    else if (cur_clm >= player.x && cur_row >= player.y && diff_y < 6 && diff_x<6) {
                         this.ctx.globalAlpha = 0.6;
                     }
-                    else if (cur_clm >= player_x && cur_row >= player_y && diff_y < 7 && diff_x<7) {
+                    else if (cur_clm >= player.x && cur_row >= player.y && diff_y < 7 && diff_x<7) {
                         this.ctx.globalAlpha = 0.8;
                     }
                     this.drawWall(coord.x, coord.y);
                     this.ctx.globalAlpha = 1;
                 }
 
-                if (cur_row==player_y && cur_clm==player_x) {
-                    this.drawPlayer(player_x, player_y, this.wid, this.hei, player_dir);
+                if (cur_row==player.y && cur_clm==player.x) {
+                    this.drawPlayer(player);
                 }
-
-
-                for(var key in monsters) {
-                    if (monsters[key].x==cur_clm && monsters[key].y==cur_row) {
-                        this.drawPlayer(monsters[key].x, monsters[key].y, this.wid, this.hei, null);
+                for(var key in mob_list) {
+                    if (mob_list[key].x==cur_clm && mob_list[key].y==cur_row) {
+                        this.drawPlayer(mob_list[key]);
                     }
-                }
-
-                if (cur_row==monster_y && cur_clm==monster_x) {
-                    this.drawMonster(monster_x, monster_y, this.wid, this.hei);
                 }
 
             }
@@ -203,16 +162,16 @@ class Stage {
     }
 
     drawPointer() {
-        tileX = Math.round((this.mouse_x - this.draw_start_x ) / this.cell_width + (this.mouse_y-this.draw_start_y) / this.cell_height);
-        tileY = Math.round((this.mouse_y - this.draw_start_y) / this.cell_height - (this.mouse_x-this.draw_start_x) / this.cell_width);
+        let tileX = Math.round((this.mouse_x - this.draw_start_x) / this.cell_width  + (this.mouse_y-this.draw_start_y) / this.cell_height);
+        let tileY = Math.round((this.mouse_y - this.draw_start_y) / this.cell_height - (this.mouse_x-this.draw_start_x) / this.cell_width);
 
         let coord = this.ConvertToCoord(tileX, tileY);
 
-        if (tileX > player_x || tileY < player_y) {
-            player_dir = 'r'
+        if (tileX > player.x || tileY < player.y) {
+            player.dir = 'r'
         }
         else {
-            player_dir = 'l'
+            player.dir = 'l'
         }
 
         this.drawRhomb(coord.x, coord.y);
@@ -224,7 +183,7 @@ class Stage {
                 this.ctx.fillText(this.map[tileY][tileX]['obj'], coord.x+20, coord.y);
             }
         }
-        else if (tileY == player_y && tileX == player_x) {
+        else if (tileY == player.y && tileX == player.x) {
             this.ctx.fillText("Player", coord.x+20, coord.y);
         }
     }
@@ -239,12 +198,17 @@ class Stage {
 }
 
 class Creature {
-    constructor(name, x, y, health) {
+    constructor(name, x, y, health, sprite) {
         this.name = name;
         this.x = x;
         this.y = y;
-        this.dir = 'r'
-        health = 100;
+        this.dir = 'r';
+        this.health = health;
+        this.sprite = sprite;
+        this.img_l = new Image();
+        this.img_r = new Image();
+        this.img_l.src = '/static/img/chars/'.concat(this.sprite, '/left.png');
+        this.img_r.src = '/static/img/chars/'.concat(this.sprite, '/right.png');
     }
 }
 
@@ -253,23 +217,17 @@ document.addEventListener('DOMContentLoaded', function() {
 
     var stage = new Stage()
 
+    imgs.wall.src     = '/static/img/landscape/wall0.png';
+    imgs.floor.src    = '/static/img/landscape/floor.png';
+    imgs.stairway.src = '/static/img/landscape/stairway.png';
+
     // MAIN LOOP //
 
-    // var FPS = 20;
-
     function mainLoop() {
-        if (stage.new_draw_start_x < stage.draw_start_x) {
-            stage.draw_start_x = stage.draw_start_x - stage.screen_step_x;
-        }
-        else if (stage.new_draw_start_x > stage.draw_start_x) {
-            stage.draw_start_x = stage.draw_start_x + stage.screen_step_x;
-        }
-        if (stage.new_draw_start_y < stage.draw_start_y) {
-            stage.draw_start_y = stage.draw_start_y - stage.screen_step_y;
-        }
-        if (stage.new_draw_start_y > stage.draw_start_y) {
-            stage.draw_start_y = stage.draw_start_y + stage.screen_step_y;
-        }
+        if      (stage.new_draw_start_x < stage.draw_start_x) { stage.draw_start_x = stage.draw_start_x - stage.screen_step_x; }
+        else if (stage.new_draw_start_x > stage.draw_start_x) { stage.draw_start_x = stage.draw_start_x + stage.screen_step_x; }
+        if      (stage.new_draw_start_y < stage.draw_start_y) { stage.draw_start_y = stage.draw_start_y - stage.screen_step_y; }
+        if      (stage.new_draw_start_y > stage.draw_start_y) { stage.draw_start_y = stage.draw_start_y + stage.screen_step_y; }
         stage.ctx.clearRect(0, 0, 1800, 900); // clearing anything drawn on canvas
         stage.ctx.fillStyle = "black";
         stage.ctx.fillRect(0, 0, stage.canvas.width, stage.canvas.height);
@@ -283,8 +241,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // WEB SOCKETS //
 
-    // Correctly decide between ws:// and wss://
-    var ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
+    var ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";  // Correctly decide between ws:// and wss://
     var ws_path = ws_scheme + '://' + window.location.host + "/stream/";
     stage.showMessage("Connecting to " + ws_path)
     var socket = new ReconnectingWebSocket(ws_path);
@@ -304,7 +261,7 @@ document.addEventListener('DOMContentLoaded', function() {
         var data = JSON.parse(message.data);
 
         if (data.error) {
-            stage.showMessage("data.error")
+            stage.showMessage(data.error)
             return;
         }
 
@@ -312,15 +269,21 @@ document.addEventListener('DOMContentLoaded', function() {
 
             stage.showMessage("Joining room " + data.join)
 
-            stage.map = data.message.field;
-            username = data.message.username;
-            player_x = data.message.start_x;
-            player_y = data.message.start_y;
+            player = new Creature(data.message.username, data.message.start_x, data.message.start_y, 100, 'rogue');
 
-            stage.draw_start_x = stage.draw_center_x - ( (player_x) * stage.cell_width/2 ) + ( (player_y) * stage.cell_width/2 );
-            stage.draw_start_y = stage.draw_center_y - ( (player_y) * stage.cell_height/2 ) - ( (player_x) * stage.cell_height/2 );
+            stage.map = data.message.field;
+            stage.draw_start_x = stage.draw_center_x - ( (player.x) * stage.cell_width/2 ) + ( (player.y) * stage.cell_width/2 );
+            stage.draw_start_y = stage.draw_center_y - ( (player.y) * stage.cell_height/2 ) - ( (player.x) * stage.cell_height/2 );
             stage.new_draw_start_x = stage.draw_start_x;
             stage.new_draw_start_y = stage.draw_start_y;
+
+            for (var list_index in data.message.mob_list) {
+                let list_row = data.message.mob_list[list_index];
+                Object.keys(list_row).forEach(function(mob_name) {
+                    let member_dict = list_row[mob_name]
+                    mob_list[mob_name] = new Creature(mob_name, parseInt(member_dict.x), parseInt(member_dict.y), parseInt(member_dict.health), 'rogue');
+                });
+            }
 
         } else if (data.leave) {
 
@@ -337,17 +300,15 @@ document.addEventListener('DOMContentLoaded', function() {
                                     "<span class='msg-body'>" + data.message.text + "</span>")
                     }
                     else {
-                        if (data.username == username) {
-                            if (stage.collision(data.message.new_x, data.message.new_y)){
-                                return;
-                            }
-                            player_x = data.message.new_x;
-                            player_y = data.message.new_y;
-                            stage.new_draw_start_x = stage.draw_center_x - ( (player_x) * stage.cell_width/2 )  + ( (player_y) * stage.cell_width/2 );
-                            stage.new_draw_start_y = stage.draw_center_y - ( (player_y) * stage.cell_height/2 ) - ( (player_x) * stage.cell_height/2 );
+                        if (data.username == player.name) {
+                            player.x = data.message.new_x;
+                            player.y = data.message.new_y;
+                            stage.new_draw_start_x = stage.draw_center_x - ( (player.x) * stage.cell_width/2 )  + ( (player.y) * stage.cell_width/2 );
+                            stage.new_draw_start_y = stage.draw_center_y - ( (player.y) * stage.cell_height/2 ) - ( (player.x) * stage.cell_height/2 );
                         }
                         else {
-                            monsters[data.username] = {'x': data.message.new_x, 'y': data.message.new_y};
+                            mob_list[data.username].x = data.message.new_x;
+                            mob_list[data.username].y = data.message.new_y;
                         }
                     }
                     break
@@ -365,12 +326,12 @@ document.addEventListener('DOMContentLoaded', function() {
                     break;
 
                 case 'enter':
-                    monsters[data.username] = {'x': data.x, 'y': data.y };
+                    mob_list[data.username] = new Creature(data.username, data.x, data.y, 100, 'rogue');
                     stage.showMessage(data.username + " joined the room")
                     break;
 
                 case 'leave':
-                    delete monsters[data.username]
+                    delete mob_list[data.username]
                     stage.showMessage(data.username + " left the room")
                     break;
 
@@ -442,39 +403,43 @@ document.addEventListener('DOMContentLoaded', function() {
         // showMessage(key)
         switch (key) {
             case 87:  // up
-                new_x = player_x-1;
-                new_y = player_y-1;
+                new_x = player.x-1;
+                new_y = player.y-1;
                 break;
             case 81:  // up left
-                new_x = player_x-1;
-                new_y = player_y;
+                new_x = player.x-1;
+                new_y = player.y;
                 break;
             case 69:  // up right
-                new_x = player_x;
-                new_y = player_y-1;
+                new_x = player.x;
+                new_y = player.y-1;
                 break;
             case 88:  // down
-                new_x = player_x+1;
-                new_y = player_y+1;
+                new_x = player.x+1;
+                new_y = player.y+1;
                 break;
             case 90:  // down left
-                new_x = player_x;
-                new_y = player_y+1;
+                new_x = player.x;
+                new_y = player.y+1;
                 break;
             case 67:  // down right
-                new_x = player_x+1;
-                new_y = player_y;
+                new_x = player.x+1;
+                new_y = player.y;
                 break;
             case 68:  // right
-                new_x = player_x+1;
-                new_y = player_y-1;
+                new_x = player.x+1;
+                new_y = player.y-1;
                 break;
             case 65:  // left
-                new_x = player_x-1;
-                new_y = player_y+1;
+                new_x = player.x-1;
+                new_y = player.y+1;
                 break;
             default:
                 return;
+        }
+
+        if (stage.collision(new_x, new_y)) {
+            return;
         }
 
         if (new_x && new_y) {
@@ -482,9 +447,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 "command": "send",
                 "room": stage.gameId,
                 "message": {
-                    'username': username,
-                    'old_x': player_x,
-                    'old_y': player_y,
+                    'username': player.name,
+                    'old_x': player.x,
+                    'old_y': player.y,
                     'new_x': new_x,
                     'new_y': new_y
                 }
